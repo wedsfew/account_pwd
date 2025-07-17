@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// .wrangler/tmp/bundle-REs1Xv/checked-fetch.js
+// .wrangler/tmp/bundle-OfWwXQ/checked-fetch.js
 var urls = /* @__PURE__ */ new Set();
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
@@ -27,7 +27,7 @@ globalThis.fetch = new Proxy(globalThis.fetch, {
   }
 });
 
-// .wrangler/tmp/bundle-REs1Xv/strip-cf-connecting-ip-header.js
+// .wrangler/tmp/bundle-OfWwXQ/strip-cf-connecting-ip-header.js
 function stripCfConnectingIPHeader(input, init) {
   const request = new Request(input, init);
   request.headers.delete("CF-Connecting-IP");
@@ -840,38 +840,7 @@ function getLoginContent() {
             display: none;
         }
 
-        .demo-info {
-            background: #f7fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 20px;
-            font-size: 14px;
-            color: #4a5568;
-        }
 
-        .demo-info h3 {
-            margin-bottom: 10px;
-            color: #2d3748;
-        }
-
-        .demo-info ul {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        .demo-info li {
-            margin-bottom: 5px;
-            padding-left: 15px;
-            position: relative;
-        }
-
-        .demo-info li:before {
-            content: "\u2022";
-            color: #667eea;
-            position: absolute;
-            left: 0;
-        }
     </style>
 </head>
 <body>
@@ -899,14 +868,6 @@ function getLoginContent() {
             <div class="error-message" id="errorMessage"></div>
             <div class="success-message" id="successMessage"></div>
         </form>
-        
-        <div class="demo-info">
-            <h3>\u6F14\u793A\u8D26\u6237</h3>
-            <ul>
-                <li>\u7528\u6237\u540D: admin</li>
-                <li>\u5BC6\u7801: 123456</li>
-            </ul>
-        </div>
     </div>
 
     <script>
@@ -2606,7 +2567,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-REs1Xv/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-OfWwXQ/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -2638,7 +2599,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-REs1Xv/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-OfWwXQ/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
