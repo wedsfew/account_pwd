@@ -226,6 +226,14 @@ var src_default = {
 async function serveStaticFiles(request, corsHeaders) {
   const url = new URL(request.url);
   const path = url.pathname;
+  if (path === "/login") {
+    return new Response(getLoginContent(), {
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "text/html"
+      }
+    });
+  }
   if (path === "/" || path === "/index.html") {
     return new Response(getHTMLContent(), {
       headers: {
@@ -258,6 +266,282 @@ async function serveStaticFiles(request, corsHeaders) {
   });
 }
 __name(serveStaticFiles, "serveStaticFiles");
+function getLoginContent() {
+  return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>\u767B\u5F55 - \u8D26\u6237\u5BC6\u7801\u7BA1\u7406\u5DE5\u5177</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-header {
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: #4a5568;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .success-message {
+            color: #38a169;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .demo-info {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .demo-info h3 {
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        .demo-info ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .demo-info li {
+            margin-bottom: 5px;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .demo-info li:before {
+            content: "\u2022";
+            color: #667eea;
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>\u{1F510} \u8D26\u6237\u5BC6\u7801\u7BA1\u7406\u5DE5\u5177</h1>
+            <p>\u8BF7\u767B\u5F55\u4EE5\u8BBF\u95EE\u60A8\u7684\u8D26\u6237\u6570\u636E</p>
+        </div>
+        
+        <form class="login-form" id="loginForm">
+            <div class="form-group">
+                <label for="username">\u7528\u6237\u540D</label>
+                <input type="text" id="username" name="username" required placeholder="\u8BF7\u8F93\u5165\u7528\u6237\u540D">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">\u5BC6\u7801</label>
+                <input type="password" id="password" name="password" required placeholder="\u8BF7\u8F93\u5165\u5BC6\u7801">
+            </div>
+            
+            <button type="submit" class="login-btn" id="loginBtn">
+                \u767B\u5F55
+            </button>
+            
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+        </form>
+        
+        <div class="demo-info">
+            <h3>\u6F14\u793A\u8D26\u6237</h3>
+            <ul>
+                <li>\u7528\u6237\u540D: admin</li>
+                <li>\u5BC6\u7801: 123456</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            
+            // \u9690\u85CF\u4E4B\u524D\u7684\u6D88\u606F
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            // \u9A8C\u8BC1\u8F93\u5165
+            if (!username || !password) {
+                showError('\u8BF7\u586B\u5199\u7528\u6237\u540D\u548C\u5BC6\u7801');
+                return;
+            }
+            
+            // \u7981\u7528\u767B\u5F55\u6309\u94AE
+            loginBtn.disabled = true;
+            loginBtn.textContent = '\u767B\u5F55\u4E2D...';
+            
+            try {
+                // \u9A8C\u8BC1\u7528\u6237\u51ED\u636E
+                if (username === 'admin' && password === '123456') {
+                    // \u767B\u5F55\u6210\u529F
+                    showSuccess('\u767B\u5F55\u6210\u529F\uFF0C\u6B63\u5728\u8DF3\u8F6C...');
+                    
+                    // \u5B58\u50A8\u767B\u5F55\u72B6\u6001
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('username', username);
+                    localStorage.setItem('loginTime', Date.now().toString());
+                    
+                    // \u5EF6\u8FDF\u8DF3\u8F6C\u5230\u4E3B\u9875\u9762
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1000);
+                } else {
+                    showError('\u7528\u6237\u540D\u6216\u5BC6\u7801\u9519\u8BEF');
+                }
+            } catch (error) {
+                showError('\u767B\u5F55\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5');
+                console.error('\u767B\u5F55\u9519\u8BEF:', error);
+            } finally {
+                // \u6062\u590D\u767B\u5F55\u6309\u94AE
+                loginBtn.disabled = false;
+                loginBtn.textContent = '\u767B\u5F55';
+            }
+        });
+        
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+        
+        function showSuccess(message) {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+        }
+        
+        // \u68C0\u67E5\u662F\u5426\u5DF2\u7ECF\u767B\u5F55
+        window.addEventListener('load', function() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (isLoggedIn === 'true') {
+                // \u68C0\u67E5\u767B\u5F55\u662F\u5426\u8FC7\u671F\uFF0824\u5C0F\u65F6\uFF09
+                const loginTime = parseInt(localStorage.getItem('loginTime') || '0');
+                const now = Date.now();
+                const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
+                
+                if (hoursSinceLogin < 24) {
+                    // \u767B\u5F55\u672A\u8FC7\u671F\uFF0C\u76F4\u63A5\u8DF3\u8F6C\u5230\u4E3B\u9875\u9762
+                    window.location.href = '/';
+                } else {
+                    // \u767B\u5F55\u5DF2\u8FC7\u671F\uFF0C\u6E05\u9664\u767B\u5F55\u72B6\u6001
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('username');
+                    localStorage.removeItem('loginTime');
+                }
+            }
+        });
+    <\/script>
+</body>
+</html>`;
+}
+__name(getLoginContent, "getLoginContent");
 function getHTMLContent() {
   return `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -270,7 +554,13 @@ function getHTMLContent() {
 <body>
     <div class="container">
         <header>
-            <h1>\u{1F510} \u8D26\u6237\u5BC6\u7801\u7BA1\u7406\u5DE5\u5177</h1>
+            <div class="header-content">
+                <h1>\u{1F510} \u8D26\u6237\u5BC6\u7801\u7BA1\u7406\u5DE5\u5177</h1>
+                <div class="user-info">
+                    <span id="userDisplay">\u6B22\u8FCE\uFF0Cadmin</span>
+                    <button onclick="logout()" class="logout-btn">\u767B\u51FA</button>
+                </div>
+            </div>
         </header>
         
         <div class="main-content">
@@ -352,10 +642,50 @@ header {
     margin-bottom: 30px;
 }
 
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
 header h1 {
     color: white;
     font-size: 2.5rem;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    margin: 0;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: white;
+    font-size: 16px;
+}
+
+#userDisplay {
+    font-weight: 600;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.logout-btn {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.3);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    background: rgba(255,255,255,0.3);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-1px);
 }
 
 .main-content {
@@ -529,12 +859,17 @@ button:hover {
 
 /* \u54CD\u5E94\u5F0F\u8BBE\u8BA1 */
 @media (max-width: 768px) {
-    .main-content {
-        grid-template-columns: 1fr;
+    .header-content {
+        flex-direction: column;
+        text-align: center;
     }
     
     header h1 {
         font-size: 2rem;
+    }
+    
+    .main-content {
+        grid-template-columns: 1fr;
     }
     
     .container {
@@ -574,6 +909,16 @@ let editingAccountId = null;
 
 // \u9875\u9762\u52A0\u8F7D\u65F6\u521D\u59CB\u5316
 document.addEventListener('DOMContentLoaded', function() {
+    // \u68C0\u67E5\u767B\u5F55\u72B6\u6001
+    if (!checkLoginStatus()) {
+        window.location.href = '/login';
+        return;
+    }
+    
+    // \u66F4\u65B0\u7528\u6237\u663E\u793A
+    updateUserDisplay();
+    
+    // \u521D\u59CB\u5316\u529F\u80FD
     loadCategories();
     loadAccounts();
     
@@ -597,6 +942,44 @@ document.addEventListener('DOMContentLoaded', function() {
         saveEditedAccount();
     });
 });
+
+// \u68C0\u67E5\u767B\u5F55\u72B6\u6001
+function checkLoginStatus() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    if (isLoggedIn !== 'true') {
+        return false;
+    }
+    
+    // \u68C0\u67E5\u767B\u5F55\u662F\u5426\u8FC7\u671F\uFF0824\u5C0F\u65F6\uFF09
+    const loginTime = parseInt(localStorage.getItem('loginTime') || '0');
+    const now = Date.now();
+    const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
+    
+    if (hoursSinceLogin >= 24) {
+        // \u767B\u5F55\u5DF2\u8FC7\u671F\uFF0C\u6E05\u9664\u767B\u5F55\u72B6\u6001
+        logout();
+        return false;
+    }
+    
+    return true;
+}
+
+// \u66F4\u65B0\u7528\u6237\u663E\u793A
+function updateUserDisplay() {
+    const username = localStorage.getItem('username') || 'admin';
+    const userDisplay = document.getElementById('userDisplay');
+    if (userDisplay) {
+        userDisplay.textContent = \`\u6B22\u8FCE\uFF0C\${username}\`;
+    }
+}
+
+// \u767B\u51FA\u529F\u80FD
+function logout() {
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('username');
+    localStorage.removeItem('loginTime');
+    window.location.href = '/login';
+}
 
 // API\u5DE5\u5177\u51FD\u6570
 async function apiCall(url, options = {}) {

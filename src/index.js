@@ -37,6 +37,16 @@ async function serveStaticFiles(request, corsHeaders) {
   const url = new URL(request.url);
   const path = url.pathname;
   
+  // 登录页面
+  if (path === '/login') {
+    return new Response(getLoginContent(), {
+      headers: { 
+        ...corsHeaders, 
+        'Content-Type': 'text/html' 
+      }
+    });
+  }
+  
   // 默认返回HTML内容
   if (path === '/' || path === '/index.html') {
     return new Response(getHTMLContent(), {
@@ -76,6 +86,282 @@ async function serveStaticFiles(request, corsHeaders) {
   });
 }
 
+function getLoginContent() {
+  return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 账户密码管理工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-header {
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: #4a5568;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .success-message {
+            color: #38a169;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .demo-info {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .demo-info h3 {
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        .demo-info ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .demo-info li {
+            margin-bottom: 5px;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .demo-info li:before {
+            content: "•";
+            color: #667eea;
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>🔐 账户密码管理工具</h1>
+            <p>请登录以访问您的账户数据</p>
+        </div>
+        
+        <form class="login-form" id="loginForm">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" name="username" required placeholder="请输入用户名">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" name="password" required placeholder="请输入密码">
+            </div>
+            
+            <button type="submit" class="login-btn" id="loginBtn">
+                登录
+            </button>
+            
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+        </form>
+        
+        <div class="demo-info">
+            <h3>演示账户</h3>
+            <ul>
+                <li>用户名: admin</li>
+                <li>密码: 123456</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            
+            // 隐藏之前的消息
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            // 验证输入
+            if (!username || !password) {
+                showError('请填写用户名和密码');
+                return;
+            }
+            
+            // 禁用登录按钮
+            loginBtn.disabled = true;
+            loginBtn.textContent = '登录中...';
+            
+            try {
+                // 验证用户凭据
+                if (username === 'admin' && password === '123456') {
+                    // 登录成功
+                    showSuccess('登录成功，正在跳转...');
+                    
+                    // 存储登录状态
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('username', username);
+                    localStorage.setItem('loginTime', Date.now().toString());
+                    
+                    // 延迟跳转到主页面
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1000);
+                } else {
+                    showError('用户名或密码错误');
+                }
+            } catch (error) {
+                showError('登录失败，请重试');
+                console.error('登录错误:', error);
+            } finally {
+                // 恢复登录按钮
+                loginBtn.disabled = false;
+                loginBtn.textContent = '登录';
+            }
+        });
+        
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+        
+        function showSuccess(message) {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+        }
+        
+        // 检查是否已经登录
+        window.addEventListener('load', function() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (isLoggedIn === 'true') {
+                // 检查登录是否过期（24小时）
+                const loginTime = parseInt(localStorage.getItem('loginTime') || '0');
+                const now = Date.now();
+                const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
+                
+                if (hoursSinceLogin < 24) {
+                    // 登录未过期，直接跳转到主页面
+                    window.location.href = '/';
+                } else {
+                    // 登录已过期，清除登录状态
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('username');
+                    localStorage.removeItem('loginTime');
+                }
+            }
+        });
+    </script>
+</body>
+</html>`;
+}
+
 function getHTMLContent() {
   return `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -88,7 +374,13 @@ function getHTMLContent() {
 <body>
     <div class="container">
         <header>
-            <h1>🔐 账户密码管理工具</h1>
+            <div class="header-content">
+                <h1>🔐 账户密码管理工具</h1>
+                <div class="user-info">
+                    <span id="userDisplay">欢迎，admin</span>
+                    <button onclick="logout()" class="logout-btn">登出</button>
+                </div>
+            </div>
         </header>
         
         <div class="main-content">
@@ -170,10 +462,50 @@ header {
     margin-bottom: 30px;
 }
 
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
 header h1 {
     color: white;
     font-size: 2.5rem;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    margin: 0;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: white;
+    font-size: 16px;
+}
+
+#userDisplay {
+    font-weight: 600;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.logout-btn {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.3);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    background: rgba(255,255,255,0.3);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-1px);
 }
 
 .main-content {
@@ -347,12 +679,17 @@ button:hover {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-    .main-content {
-        grid-template-columns: 1fr;
+    .header-content {
+        flex-direction: column;
+        text-align: center;
     }
     
     header h1 {
         font-size: 2rem;
+    }
+    
+    .main-content {
+        grid-template-columns: 1fr;
     }
     
     .container {
@@ -392,6 +729,16 @@ let editingAccountId = null;
 
 // 页面加载时初始化
 document.addEventListener('DOMContentLoaded', function() {
+    // 检查登录状态
+    if (!checkLoginStatus()) {
+        window.location.href = '/login';
+        return;
+    }
+    
+    // 更新用户显示
+    updateUserDisplay();
+    
+    // 初始化功能
     loadCategories();
     loadAccounts();
     
@@ -415,6 +762,44 @@ document.addEventListener('DOMContentLoaded', function() {
         saveEditedAccount();
     });
 });
+
+// 检查登录状态
+function checkLoginStatus() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    if (isLoggedIn !== 'true') {
+        return false;
+    }
+    
+    // 检查登录是否过期（24小时）
+    const loginTime = parseInt(localStorage.getItem('loginTime') || '0');
+    const now = Date.now();
+    const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
+    
+    if (hoursSinceLogin >= 24) {
+        // 登录已过期，清除登录状态
+        logout();
+        return false;
+    }
+    
+    return true;
+}
+
+// 更新用户显示
+function updateUserDisplay() {
+    const username = localStorage.getItem('username') || 'admin';
+    const userDisplay = document.getElementById('userDisplay');
+    if (userDisplay) {
+        userDisplay.textContent = \`欢迎，\${username}\`;
+    }
+}
+
+// 登出功能
+function logout() {
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('username');
+    localStorage.removeItem('loginTime');
+    window.location.href = '/login';
+}
 
 // API工具函数
 async function apiCall(url, options = {}) {
