@@ -1002,11 +1002,51 @@ button:hover {
     background: #e53e3e;
     color: white;
     border: none;
-    padding: 8px 12px;
-    border-radius: 6px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 14px;
+    font-weight: bold;
     margin-left: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.delete-btn:hover {
+    background: #c53030;
+    transform: scale(1.1);
+}
+
+.delete-btn::before {
+    content: "×";
+    line-height: 1;
+}
+
+.delete-btn::after {
+    content: "删除";
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    z-index: 1000;
+}
+
+.delete-btn:hover::after {
+    opacity: 1;
+    visibility: visible;
 }
 
 .edit-btn {
@@ -1375,7 +1415,7 @@ function updateCategoriesList() {
         item.className = 'category-item';
         item.innerHTML = \`
             <span class="category-name">\${category.name}</span>
-            <button class="delete-btn" onclick="deleteCategory('\${category.id}')">删除</button>
+            <button class="delete-btn" onclick="deleteCategory('\${category.id}')" title="删除"></button>
         \`;
         container.appendChild(item);
     });
@@ -1470,7 +1510,7 @@ function updateAccountsList() {
             </div>
             <div>
                 <button class="edit-btn" onclick="editAccount('\${account.id}')">编辑</button>
-                <button class="delete-btn" onclick="deleteAccount('\${account.id}')">删除</button>
+                <button class="delete-btn" onclick="deleteAccount('\${account.id}')" title="删除"></button>
             </div>
         \`;
         container.appendChild(item);

@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// .wrangler/tmp/bundle-ywgFdZ/checked-fetch.js
+// .wrangler/tmp/bundle-wMocOp/checked-fetch.js
 var urls = /* @__PURE__ */ new Set();
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
@@ -27,7 +27,7 @@ globalThis.fetch = new Proxy(globalThis.fetch, {
   }
 });
 
-// .wrangler/tmp/bundle-ywgFdZ/strip-cf-connecting-ip-header.js
+// .wrangler/tmp/bundle-wMocOp/strip-cf-connecting-ip-header.js
 function stripCfConnectingIPHeader(input, init) {
   const request = new Request(input, init);
   request.headers.delete("CF-Connecting-IP");
@@ -1327,11 +1327,51 @@ button:hover {
     background: #e53e3e;
     color: white;
     border: none;
-    padding: 8px 12px;
-    border-radius: 6px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 14px;
+    font-weight: bold;
     margin-left: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.delete-btn:hover {
+    background: #c53030;
+    transform: scale(1.1);
+}
+
+.delete-btn::before {
+    content: "\xD7";
+    line-height: 1;
+}
+
+.delete-btn::after {
+    content: "\u5220\u9664";
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    z-index: 1000;
+}
+
+.delete-btn:hover::after {
+    opacity: 1;
+    visibility: visible;
 }
 
 .edit-btn {
@@ -1700,7 +1740,7 @@ function updateCategoriesList() {
         item.className = 'category-item';
         item.innerHTML = \`
             <span class="category-name">\${category.name}</span>
-            <button class="delete-btn" onclick="deleteCategory('\${category.id}')">\u5220\u9664</button>
+            <button class="delete-btn" onclick="deleteCategory('\${category.id}')" title="\u5220\u9664"></button>
         \`;
         container.appendChild(item);
     });
@@ -1795,7 +1835,7 @@ function updateAccountsList() {
             </div>
             <div>
                 <button class="edit-btn" onclick="editAccount('\${account.id}')">\u7F16\u8F91</button>
-                <button class="delete-btn" onclick="deleteAccount('\${account.id}')">\u5220\u9664</button>
+                <button class="delete-btn" onclick="deleteAccount('\${account.id}')" title="\u5220\u9664"></button>
             </div>
         \`;
         container.appendChild(item);
@@ -1920,7 +1960,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-ywgFdZ/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-wMocOp/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -1952,7 +1992,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-ywgFdZ/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-wMocOp/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
