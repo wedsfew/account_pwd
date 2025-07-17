@@ -1648,6 +1648,61 @@ body {
     font-size: 13px;
 }
 
+.copy-btn {
+    background: none;
+    border: none;
+    color: #718096;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+}
+
+.copy-btn:hover {
+    background: #f7fafc;
+    color: #667eea;
+    transform: scale(1.1);
+}
+
+.copy-btn:active {
+    transform: scale(0.95);
+}
+
+.copy-btn svg {
+    transition: all 0.2s ease;
+}
+
+.copy-btn:hover svg {
+    stroke: #667eea;
+}
+
+/* \u590D\u5236\u6210\u529F\u63D0\u793A */
+.copy-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #48bb78;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 10000;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.copy-notification.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
 .account-actions {
     display: flex;
     gap: 8px;
@@ -2348,10 +2403,22 @@ function updateAccountsList() {
                 <div class="account-field">
                     <span class="field-label">\u7528\u6237\u540D:</span>
                     <span class="field-value">\${account.username}</span>
+                    <button class="copy-btn" onclick="copyToClipboard('\${account.username}', '\u7528\u6237\u540D')" title="\u590D\u5236\u7528\u6237\u540D">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
                 </div>
                 <div class="account-field">
                     <span class="field-label">\u5BC6\u7801:</span>
                     <span class="field-value">\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022</span>
+                    <button class="copy-btn" onclick="copyToClipboard('\${account.password}', '\u5BC6\u7801')" title="\u590D\u5236\u5BC6\u7801">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
                 </div>
                 \${account.url ? \`
                 <div class="account-field">
@@ -2448,6 +2515,52 @@ async function saveEditedAccount() {
     } catch (error) {
         console.error('\u66F4\u65B0\u8D26\u6237\u5931\u8D25:', error);
     }
+}
+
+// \u590D\u5236\u5230\u526A\u8D34\u677F\u529F\u80FD
+async function copyToClipboard(text, type) {
+    try {
+        await navigator.clipboard.writeText(text);
+        
+        // \u663E\u793A\u6210\u529F\u63D0\u793A
+        showCopySuccess(type);
+        
+        // \u6DFB\u52A0\u6309\u94AE\u52A8\u753B\u6548\u679C
+        const button = event.target.closest('.copy-btn');
+        if (button) {
+            button.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                button.style.transform = '';
+            }, 200);
+        }
+    } catch (error) {
+        console.error('\u590D\u5236\u5931\u8D25:', error);
+        alert('\u590D\u5236\u5931\u8D25\uFF0C\u8BF7\u624B\u52A8\u590D\u5236');
+    }
+}
+
+// \u663E\u793A\u590D\u5236\u6210\u529F\u63D0\u793A
+function showCopySuccess(type) {
+    // \u521B\u5EFA\u63D0\u793A\u5143\u7D20
+    const notification = document.createElement('div');
+    notification.className = 'copy-notification';
+    notification.textContent = \`\${type}\u5DF2\u590D\u5236\u5230\u526A\u8D34\u677F\`;
+    
+    // \u6DFB\u52A0\u5230\u9875\u9762
+    document.body.appendChild(notification);
+    
+    // \u663E\u793A\u52A8\u753B
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    // \u81EA\u52A8\u9690\u85CF
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 2000);
 }`;
 }
 __name(getJSContent, "getJSContent");

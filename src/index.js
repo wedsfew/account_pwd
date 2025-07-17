@@ -1323,6 +1323,61 @@ body {
     font-size: 13px;
 }
 
+.copy-btn {
+    background: none;
+    border: none;
+    color: #718096;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+}
+
+.copy-btn:hover {
+    background: #f7fafc;
+    color: #667eea;
+    transform: scale(1.1);
+}
+
+.copy-btn:active {
+    transform: scale(0.95);
+}
+
+.copy-btn svg {
+    transition: all 0.2s ease;
+}
+
+.copy-btn:hover svg {
+    stroke: #667eea;
+}
+
+/* 复制成功提示 */
+.copy-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #48bb78;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 10000;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.copy-notification.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
 .account-actions {
     display: flex;
     gap: 8px;
@@ -2023,10 +2078,22 @@ function updateAccountsList() {
                 <div class="account-field">
                     <span class="field-label">用户名:</span>
                     <span class="field-value">\${account.username}</span>
+                    <button class="copy-btn" onclick="copyToClipboard('\${account.username}', '用户名')" title="复制用户名">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
                 </div>
                 <div class="account-field">
                     <span class="field-label">密码:</span>
                     <span class="field-value">••••••••</span>
+                    <button class="copy-btn" onclick="copyToClipboard('\${account.password}', '密码')" title="复制密码">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
                 </div>
                 \${account.url ? \`
                 <div class="account-field">
@@ -2123,5 +2190,51 @@ async function saveEditedAccount() {
     } catch (error) {
         console.error('更新账户失败:', error);
     }
+}
+
+// 复制到剪贴板功能
+async function copyToClipboard(text, type) {
+    try {
+        await navigator.clipboard.writeText(text);
+        
+        // 显示成功提示
+        showCopySuccess(type);
+        
+        // 添加按钮动画效果
+        const button = event.target.closest('.copy-btn');
+        if (button) {
+            button.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                button.style.transform = '';
+            }, 200);
+        }
+    } catch (error) {
+        console.error('复制失败:', error);
+        alert('复制失败，请手动复制');
+    }
+}
+
+// 显示复制成功提示
+function showCopySuccess(type) {
+    // 创建提示元素
+    const notification = document.createElement('div');
+    notification.className = 'copy-notification';
+    notification.textContent = \`\${type}已复制到剪贴板\`;
+    
+    // 添加到页面
+    document.body.appendChild(notification);
+    
+    // 显示动画
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    // 自动隐藏
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 2000);
 }`;
 } 
