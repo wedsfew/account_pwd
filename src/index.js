@@ -183,16 +183,20 @@ function getSetupContent() {
 
         .form-group input {
             width: 100%;
-            padding: 12px 16px;
+            padding: 14px 18px;
             border: 2px solid #e2e8f0;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
-            transition: border-color 0.3s ease;
+            transition: all 0.3s ease;
+            background: #f8fafc;
         }
 
         .form-group input:focus {
             outline: none;
             border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
         }
 
         .setup-btn {
@@ -423,12 +427,26 @@ function getLoginContent() {
 
         .login-container {
             background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-radius: 25px;
+            padding: 45px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
             width: 90%;
             max-width: 400px;
             text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
         }
 
         .login-header {
@@ -437,8 +455,10 @@ function getLoginContent() {
 
         .login-header h1 {
             color: #4a5568;
-            font-size: 2rem;
-            margin-bottom: 10px;
+            font-size: 2.2rem;
+            margin-bottom: 12px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .login-header p {
@@ -466,16 +486,20 @@ function getLoginContent() {
 
         .form-group input {
             width: 100%;
-            padding: 12px 16px;
+            padding: 14px 18px;
             border: 2px solid #e2e8f0;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
-            transition: border-color 0.3s ease;
+            transition: all 0.3s ease;
+            background: #f8fafc;
         }
 
         .form-group input:focus {
             outline: none;
             border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
         }
 
         .login-btn {
@@ -815,17 +839,37 @@ body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     color: #333;
+    line-height: 1.6;
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+header::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 2px;
 }
 
 .header-content {
@@ -841,6 +885,8 @@ header h1 {
     font-size: 2.5rem;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     margin: 0;
+    font-weight: 700;
+    letter-spacing: -0.5px;
 }
 
 .user-info {
@@ -897,19 +943,47 @@ header h1 {
     display: grid;
     grid-template-columns: 1fr 2fr;
     gap: 30px;
+    animation: slideUp 0.6s ease-out 0.2s both;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .section {
     background: white;
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.section:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
 }
 
 .section h2 {
     color: #4a5568;
-    margin-bottom: 20px;
-    font-size: 1.5rem;
+    margin-bottom: 25px;
+    font-size: 1.6rem;
+    font-weight: 600;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.section h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 1px;
 }
 
 /* 表单样式 */
@@ -919,83 +993,171 @@ header h1 {
 
 input, select, textarea {
     width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
     border: 2px solid #e2e8f0;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 14px;
-    transition: border-color 0.3s ease;
+    transition: all 0.3s ease;
+    background: #f8fafc;
 }
 
 input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    transform: translateY(-1px);
 }
 
 button {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
+    padding: 14px 28px;
+    border-radius: 10px;
     cursor: pointer;
     font-size: 14px;
     font-weight: 600;
-    transition: transform 0.2s ease;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+button:hover::before {
+    left: 100%;
 }
 
 button:hover {
     transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
 }
 
 /* 列表样式 */
 .categories-list, .accounts-list {
     max-height: 400px;
     overflow-y: auto;
+    padding-right: 5px;
+}
+
+.categories-list::-webkit-scrollbar, .accounts-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.categories-list::-webkit-scrollbar-track, .accounts-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.categories-list::-webkit-scrollbar-thumb, .accounts-list::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.categories-list::-webkit-scrollbar-thumb:hover, .accounts-list::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
 }
 
 .category-item, .account-item {
     background: #f7fafc;
     border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 10px;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.category-item::before, .account-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, #667eea, #764ba2);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.category-item:hover::before, .account-item:hover::before {
+    transform: scaleY(1);
 }
 
 .category-item:hover, .account-item:hover {
     background: #edf2f7;
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .category-name {
     font-weight: 600;
     color: #4a5568;
+    font-size: 15px;
+    transition: color 0.3s ease;
+}
+
+.category-item:hover .category-name {
+    color: #2d3748;
 }
 
 .account-info {
     flex: 1;
+    padding-left: 8px;
 }
 
 .account-name {
     font-weight: 600;
     color: #2d3748;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
+    font-size: 16px;
+    transition: color 0.3s ease;
+}
+
+.account-item:hover .account-name {
+    color: #1a202c;
 }
 
 .account-username {
     color: #718096;
     font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.account-item:hover .account-username {
+    color: #4a5568;
 }
 
 .account-category {
-    background: #667eea;
+    background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 6px 10px;
+    border-radius: 6px;
     font-size: 12px;
     margin-left: 10px;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+    transition: all 0.3s ease;
+}
+
+.account-item:hover .account-category {
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+    transform: scale(1.05);
 }
 
 .delete-btn {
@@ -1050,14 +1212,22 @@ button:hover {
 }
 
 .edit-btn {
-    background: #3182ce;
+    background: linear-gradient(135deg, #3182ce, #4299e1);
     color: white;
     border: none;
-    padding: 8px 12px;
-    border-radius: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 12px;
-    margin-left: 5px;
+    margin-left: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(49, 130, 206, 0.2);
+}
+
+.edit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(49, 130, 206, 0.3);
 }
 
 /* 模态框样式 */
@@ -1075,11 +1245,26 @@ button:hover {
 .modal-content {
     background-color: white;
     margin: 5% auto;
-    padding: 30px;
-    border-radius: 15px;
+    padding: 35px;
+    border-radius: 20px;
     width: 90%;
     max-width: 500px;
     position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(-50px) scale(0.9); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
 }
 
 .close {
@@ -1098,8 +1283,24 @@ button:hover {
 }
 
 .modal-content h3 {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     color: #4a5568;
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+}
+
+.modal-content h3::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 1px;
 }
 
 /* 响应式设计 */
@@ -1107,6 +1308,7 @@ button:hover {
     .header-content {
         flex-direction: column;
         text-align: center;
+        gap: 15px;
     }
     
     header h1 {
@@ -1115,6 +1317,7 @@ button:hover {
     
     .main-content {
         grid-template-columns: 1fr;
+        gap: 20px;
     }
     
     .container {
@@ -1122,7 +1325,21 @@ button:hover {
     }
     
     .section {
-        padding: 20px;
+        padding: 25px;
+    }
+    
+    .modal-content {
+        padding: 25px;
+        margin: 10% auto;
+    }
+    
+    .user-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .change-pwd-btn, .logout-btn {
+        margin: 0;
     }
 }
 
