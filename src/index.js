@@ -183,20 +183,16 @@ function getSetupContent() {
 
         .form-group input {
             width: 100%;
-            padding: 14px 18px;
+            padding: 12px 16px;
             border: 2px solid #e2e8f0;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 16px;
-            transition: all 0.3s ease;
-            background: #f8fafc;
+            transition: border-color 0.3s ease;
         }
 
         .form-group input:focus {
             outline: none;
             border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            transform: translateY(-1px);
         }
 
         .setup-btn {
@@ -427,26 +423,12 @@ function getLoginContent() {
 
         .login-container {
             background: white;
-            border-radius: 25px;
-            padding: 45px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             width: 90%;
             max-width: 400px;
             text-align: center;
-            border: 1px solid rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        @keyframes fadeInUp {
-            from { 
-                opacity: 0; 
-                transform: translateY(30px); 
-            }
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
-            }
         }
 
         .login-header {
@@ -455,10 +437,8 @@ function getLoginContent() {
 
         .login-header h1 {
             color: #4a5568;
-            font-size: 2.2rem;
-            margin-bottom: 12px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
+            font-size: 2rem;
+            margin-bottom: 10px;
         }
 
         .login-header p {
@@ -486,20 +466,16 @@ function getLoginContent() {
 
         .form-group input {
             width: 100%;
-            padding: 14px 18px;
+            padding: 12px 16px;
             border: 2px solid #e2e8f0;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 16px;
-            transition: all 0.3s ease;
-            background: #f8fafc;
+            transition: border-color 0.3s ease;
         }
 
         .form-group input:focus {
             outline: none;
             border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            transform: translateY(-1px);
         }
 
         .login-btn {
@@ -747,63 +723,136 @@ function getHTMLContent() {
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="header-content">
-                <h1>🔐 账户密码管理工具</h1>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🔐 密码管理</h1>
                 <div class="user-info">
                     <span id="userDisplay">欢迎，admin</span>
-                    <button onclick="showChangePassword()" class="change-pwd-btn">修改密码</button>
-                    <button onclick="logout()" class="logout-btn">登出</button>
+                    <div class="user-actions">
+                        <button onclick="showChangePassword()" class="change-pwd-btn" title="修改密码">
+                            <span>🔑</span>
+                        </button>
+                        <button onclick="logout()" class="logout-btn" title="登出">
+                            <span>🚪</span>
+                        </button>
+                    </div>
                 </div>
             </div>
-        </header>
-        
-        <div class="main-content">
+            
             <!-- 分类管理 -->
-            <div class="section">
-                <h2>📁 分类管理</h2>
+            <div class="sidebar-section">
+                <h3>📁 分类管理</h3>
                 <div class="category-form">
-                    <input type="text" id="categoryName" placeholder="输入分类名称" maxlength="20">
-                    <button onclick="addCategory()">添加分类</button>
+                    <div class="input-group">
+                        <input type="text" id="categoryName" placeholder="输入分类名称" maxlength="20">
+                        <button onclick="addCategory()" class="add-btn">+</button>
+                    </div>
                 </div>
                 <div id="categoriesList" class="categories-list"></div>
             </div>
-            
-            <!-- 账户管理 -->
-            <div class="section">
+        </aside>
+        
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <div class="content-header">
                 <h2>👤 账户管理</h2>
-                <div class="account-form">
-                    <select id="accountCategory" required>
-                        <option value="">选择分类</option>
-                    </select>
-                    <input type="text" id="accountName" placeholder="账户名称" required maxlength="50">
-                    <input type="text" id="accountUsername" placeholder="用户名" required maxlength="100">
-                    <input type="password" id="accountPassword" placeholder="密码" required maxlength="100">
-                    <input type="text" id="accountUrl" placeholder="网址 (可选)" maxlength="200">
-                    <textarea id="accountNotes" placeholder="备注 (可选)" maxlength="500"></textarea>
-                    <button onclick="addAccount()">添加账户</button>
-                </div>
-                <div id="accountsList" class="accounts-list"></div>
+                <button onclick="showAddAccountForm()" class="add-account-btn">+ 添加账户</button>
             </div>
-        </div>
+            
+            <!-- 添加账户表单 -->
+            <div id="addAccountForm" class="add-account-form" style="display: none;">
+                <h3>添加新账户</h3>
+                <form id="accountForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="accountCategory">分类</label>
+                            <select id="accountCategory" required>
+                                <option value="">选择分类</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="accountName">账户名称</label>
+                            <input type="text" id="accountName" placeholder="账户名称" required maxlength="50">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="accountUsername">用户名</label>
+                            <input type="text" id="accountUsername" placeholder="用户名" required maxlength="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="accountPassword">密码</label>
+                            <input type="password" id="accountPassword" placeholder="密码" required maxlength="100">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="accountUrl">网址 (可选)</label>
+                            <input type="text" id="accountUrl" placeholder="网址" maxlength="200">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="accountNotes">备注 (可选)</label>
+                        <textarea id="accountNotes" placeholder="备注信息" maxlength="500"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="save-btn">保存账户</button>
+                        <button type="button" onclick="hideAddAccountForm()" class="cancel-btn">取消</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- 账户列表 -->
+            <div id="accountsList" class="accounts-grid"></div>
+        </main>
     </div>
     
     <!-- 编辑模态框 -->
     <div id="editModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h3>编辑账户</h3>
+            <div class="modal-header">
+                <h3>编辑账户</h3>
+                <span class="close">&times;</span>
+            </div>
             <form id="editForm">
-                <select id="editCategory" required>
-                    <option value="">选择分类</option>
-                </select>
-                <input type="text" id="editName" placeholder="账户名称" required maxlength="50">
-                <input type="text" id="editUsername" placeholder="用户名" required maxlength="100">
-                <input type="password" id="editPassword" placeholder="密码" required maxlength="100">
-                <input type="text" id="editUrl" placeholder="网址 (可选)" maxlength="200">
-                <textarea id="editNotes" placeholder="备注 (可选)" maxlength="500"></textarea>
-                <button type="submit">保存</button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editCategory">分类</label>
+                        <select id="editCategory" required>
+                            <option value="">选择分类</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editName">账户名称</label>
+                        <input type="text" id="editName" placeholder="账户名称" required maxlength="50">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editUsername">用户名</label>
+                        <input type="text" id="editUsername" placeholder="用户名" required maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="editPassword">密码</label>
+                        <input type="password" id="editPassword" placeholder="密码" required maxlength="100">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editUrl">网址 (可选)</label>
+                        <input type="text" id="editUrl" placeholder="网址" maxlength="200">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editNotes">备注 (可选)</label>
+                    <textarea id="editNotes" placeholder="备注信息" maxlength="500"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="save-btn">保存更改</button>
+                    <button type="button" onclick="closeEditModal()" class="cancel-btn">取消</button>
+                </div>
             </form>
         </div>
     </div>
@@ -811,13 +860,27 @@ function getHTMLContent() {
     <!-- 修改密码模态框 -->
     <div id="changePasswordModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h3>修改密码</h3>
+            <div class="modal-header">
+                <h3>修改密码</h3>
+                <span class="close">&times;</span>
+            </div>
             <form id="changePasswordForm">
-                <input type="password" id="currentPassword" placeholder="当前密码" required>
-                <input type="password" id="newPassword" placeholder="新密码" required minlength="6">
-                <input type="password" id="confirmNewPassword" placeholder="确认新密码" required minlength="6">
-                <button type="submit">修改密码</button>
+                <div class="form-group">
+                    <label for="currentPassword">当前密码</label>
+                    <input type="password" id="currentPassword" placeholder="当前密码" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">新密码</label>
+                    <input type="password" id="newPassword" placeholder="新密码" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="confirmNewPassword">确认新密码</label>
+                    <input type="password" id="confirmNewPassword" placeholder="确认新密码" required minlength="6">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="save-btn">修改密码</button>
+                    <button type="button" onclick="closeChangePasswordModal()" class="cancel-btn">取消</button>
+                </div>
             </form>
         </div>
     </div>
@@ -836,341 +899,411 @@ function getCSSContent() {
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #f8fafc;
     min-height: 100vh;
     color: #333;
-    line-height: 1.6;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    animation: fadeIn 0.5s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-header {
-    text-align: center;
-    margin-bottom: 40px;
-    position: relative;
-}
-
-header::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60px;
-    height: 3px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-    border-radius: 2px;
-}
-
-.header-content {
+.app-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 20px;
+    min-height: 100vh;
 }
 
-header h1 {
+/* 侧边栏样式 */
+.sidebar {
+    width: 300px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    font-size: 2.5rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    margin: 0;
-    font-weight: 700;
-    letter-spacing: -0.5px;
+    padding: 0;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.sidebar-header {
+    padding: 30px 25px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header h1 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
 }
 
 .user-info {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 15px;
-    color: white;
-    font-size: 16px;
 }
 
 #userDisplay {
     font-weight: 600;
+    font-size: 16px;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
 }
 
-.change-pwd-btn {
+.user-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.change-pwd-btn, .logout-btn {
     background: rgba(255,255,255,0.15);
     color: white;
     border: 2px solid rgba(255,255,255,0.25);
-    padding: 8px 16px;
-    border-radius: 6px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 16px;
     transition: all 0.3s ease;
-    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.change-pwd-btn:hover {
+.change-pwd-btn:hover, .logout-btn:hover {
     background: rgba(255,255,255,0.25);
     border-color: rgba(255,255,255,0.4);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
 }
 
-.logout-btn {
+.sidebar-section {
+    padding: 25px;
+}
+
+.sidebar-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.category-form {
+    margin-bottom: 25px;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.input-group input::placeholder {
+    color: rgba(255,255,255,0.7);
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.15);
+}
+
+.add-btn {
     background: rgba(255,255,255,0.2);
     color: white;
     border: 2px solid rgba(255,255,255,0.3);
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.logout-btn:hover {
-    background: rgba(255,255,255,0.3);
-    border-color: rgba(255,255,255,0.5);
-    transform: translateY(-1px);
-}
-
-.main-content {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 30px;
-    animation: slideUp 0.6s ease-out 0.2s both;
-}
-
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.section {
-    background: white;
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-}
-
-.section:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-}
-
-.section h2 {
-    color: #4a5568;
-    margin-bottom: 25px;
-    font-size: 1.6rem;
-    font-weight: 600;
-    position: relative;
-    padding-bottom: 10px;
-}
-
-.section h2::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
     width: 40px;
-    height: 2px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-    border-radius: 1px;
-}
-
-/* 表单样式 */
-.category-form, .account-form {
-    margin-bottom: 25px;
-}
-
-input, select, textarea {
-    width: 100%;
-    padding: 14px 16px;
-    margin-bottom: 18px;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    background: #f8fafc;
-}
-
-input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: #667eea;
-    background: white;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    transform: translateY(-1px);
-}
-
-button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 14px 28px;
-    border-radius: 10px;
+    height: 40px;
+    border-radius: 50%;
     cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 18px;
+    font-weight: bold;
     transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.5s ease;
+.add-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.1);
 }
 
-button:hover::before {
-    left: 100%;
-}
-
-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-}
-
-/* 列表样式 */
-.categories-list, .accounts-list {
-    max-height: 400px;
+.categories-list {
+    max-height: 300px;
     overflow-y: auto;
-    padding-right: 5px;
 }
 
-.categories-list::-webkit-scrollbar, .accounts-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.categories-list::-webkit-scrollbar-track, .accounts-list::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.categories-list::-webkit-scrollbar-thumb, .accounts-list::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
-}
-
-.categories-list::-webkit-scrollbar-thumb:hover, .accounts-list::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
-
-.category-item, .account-item {
-    background: #f7fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 18px;
-    margin-bottom: 12px;
+.category-item {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
 }
 
-.category-item::before, .account-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: linear-gradient(180deg, #667eea, #764ba2);
-    transform: scaleY(0);
-    transition: transform 0.3s ease;
-}
-
-.category-item:hover::before, .account-item:hover::before {
-    transform: scaleY(1);
-}
-
-.category-item:hover, .account-item:hover {
-    background: #edf2f7;
+.category-item:hover {
+    background: rgba(255,255,255,0.15);
     transform: translateX(5px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .category-name {
     font-weight: 600;
-    color: #4a5568;
-    font-size: 15px;
-    transition: color 0.3s ease;
+    color: white;
 }
 
-.category-item:hover .category-name {
-    color: #2d3748;
-}
-
-.account-info {
+/* 主内容区样式 */
+.main-content {
     flex: 1;
-    padding-left: 8px;
+    margin-left: 300px;
+    padding: 30px;
+    background: #f8fafc;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.content-header h2 {
+    color: #4a5568;
+    font-size: 1.8rem;
+    margin: 0;
+}
+
+.add-account-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.add-account-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* 添加账户表单 */
+.add-account-form {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.add-account-form h3 {
+    color: #4a5568;
+    margin-bottom: 25px;
+    font-size: 1.3rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.save-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.save-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.cancel-btn {
+    background: #e2e8f0;
+    color: #4a5568;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+    background: #cbd5e0;
+    transform: translateY(-2px);
+}
+
+/* 账户网格 */
+.accounts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.account-card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+}
+
+.account-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.account-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
 }
 
 .account-name {
     font-weight: 600;
     color: #2d3748;
-    margin-bottom: 6px;
-    font-size: 16px;
-    transition: color 0.3s ease;
-}
-
-.account-item:hover .account-name {
-    color: #1a202c;
-}
-
-.account-username {
-    color: #718096;
-    font-size: 14px;
-    transition: color 0.3s ease;
-}
-
-.account-item:hover .account-username {
-    color: #4a5568;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
 }
 
 .account-category {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: #667eea;
     color: white;
-    padding: 6px 10px;
-    border-radius: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
     font-size: 12px;
-    margin-left: 10px;
-    font-weight: 500;
-    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+    font-weight: 600;
+}
+
+.account-details {
+    margin-bottom: 20px;
+}
+
+.account-field {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f7fafc;
+}
+
+.account-field:last-child {
+    border-bottom: none;
+}
+
+.field-label {
+    font-weight: 600;
+    color: #718096;
+    width: 80px;
+    font-size: 13px;
+}
+
+.field-value {
+    color: #2d3748;
+    flex: 1;
+    font-size: 14px;
+}
+
+.account-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.edit-btn {
+    background: #3182ce;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
     transition: all 0.3s ease;
 }
 
-.account-item:hover .account-category {
-    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
-    transform: scale(1.05);
+.edit-btn:hover {
+    background: #2c5aa0;
+    transform: translateY(-1px);
 }
 
 .delete-btn {
     background: #e53e3e;
     color: white;
     border: none;
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
-    margin-left: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1191,13 +1324,13 @@ button:hover {
 .delete-btn::after {
     content: "删除";
     position: absolute;
-    bottom: -30px;
+    bottom: -35px;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.8);
     color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 6px 10px;
+    border-radius: 6px;
     font-size: 12px;
     white-space: nowrap;
     opacity: 0;
@@ -1211,25 +1344,6 @@ button:hover {
     visibility: visible;
 }
 
-.edit-btn {
-    background: linear-gradient(135deg, #3182ce, #4299e1);
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 12px;
-    margin-left: 8px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(49, 130, 206, 0.2);
-}
-
-.edit-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(49, 130, 206, 0.3);
-}
-
 /* 模态框样式 */
 .modal {
     display: none;
@@ -1240,106 +1354,94 @@ button:hover {
     width: 100%;
     height: 100%;
     background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
 }
 
 .modal-content {
     background-color: white;
-    margin: 5% auto;
-    padding: 35px;
+    margin: 3% auto;
     border-radius: 20px;
     width: 90%;
-    max-width: 500px;
+    max-width: 600px;
     position: relative;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-    border: 1px solid rgba(255,255,255,0.2);
-    backdrop-filter: blur(10px);
-    animation: modalSlideIn 0.3s ease-out;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    overflow: hidden;
 }
 
-@keyframes modalSlideIn {
-    from { 
-        opacity: 0; 
-        transform: translateY(-50px) scale(0.9); 
-    }
-    to { 
-        opacity: 1; 
-        transform: translateY(0) scale(1); 
-    }
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 25px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
 }
 
 .close {
-    color: #aaa;
-    float: right;
+    color: white;
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
-    position: absolute;
-    right: 20px;
-    top: 15px;
+    transition: all 0.3s ease;
 }
 
 .close:hover {
-    color: #000;
+    transform: scale(1.2);
 }
 
-.modal-content h3 {
-    margin-bottom: 25px;
-    color: #4a5568;
-    font-size: 1.4rem;
-    font-weight: 600;
-    text-align: center;
-    position: relative;
-}
-
-.modal-content h3::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 2px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-    border-radius: 1px;
+.modal-content form {
+    padding: 30px;
 }
 
 /* 响应式设计 */
-@media (max-width: 768px) {
-    .header-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 15px;
-    }
-    
-    header h1 {
-        font-size: 2rem;
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 250px;
     }
     
     .main-content {
+        margin-left: 250px;
+    }
+    
+    .form-row {
         grid-template-columns: 1fr;
-        gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
     }
     
-    .container {
-        padding: 15px;
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
     }
     
-    .section {
-        padding: 25px;
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+    }
+    
+    .content-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .accounts-grid {
+        grid-template-columns: 1fr;
     }
     
     .modal-content {
-        padding: 25px;
-        margin: 10% auto;
-    }
-    
-    .user-info {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .change-pwd-btn, .logout-btn {
-        margin: 0;
+        margin: 5% auto;
+        width: 95%;
     }
 }
 
@@ -1360,6 +1462,24 @@ button:hover {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
+}
+
+/* 侧边栏滚动条 */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.1);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.5);
 }`;
 }
 
@@ -1409,6 +1529,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('editForm').addEventListener('submit', function(e) {
         e.preventDefault();
         saveEditedAccount();
+    });
+    
+    // 添加账户表单提交
+    document.getElementById('accountForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        addAccount();
     });
     
     // 修改密码表单提交
@@ -1469,6 +1595,23 @@ async function updateUserDisplay() {
     }
 }
 
+// 显示添加账户表单
+function showAddAccountForm() {
+    document.getElementById('addAccountForm').style.display = 'block';
+    // 清空表单
+    document.getElementById('accountCategory').value = '';
+    document.getElementById('accountName').value = '';
+    document.getElementById('accountUsername').value = '';
+    document.getElementById('accountPassword').value = '';
+    document.getElementById('accountUrl').value = '';
+    document.getElementById('accountNotes').value = '';
+}
+
+// 隐藏添加账户表单
+function hideAddAccountForm() {
+    document.getElementById('addAccountForm').style.display = 'none';
+}
+
 // 显示修改密码模态框
 function showChangePassword() {
     document.getElementById('changePasswordModal').style.display = 'block';
@@ -1476,6 +1619,16 @@ function showChangePassword() {
     document.getElementById('currentPassword').value = '';
     document.getElementById('newPassword').value = '';
     document.getElementById('confirmNewPassword').value = '';
+}
+
+// 关闭编辑模态框
+function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+}
+
+// 关闭修改密码模态框
+function closeChangePasswordModal() {
+    document.getElementById('changePasswordModal').style.display = 'none';
 }
 
 // 修改密码功能
@@ -1695,7 +1848,7 @@ async function addAccount() {
         
         accounts.push(newAccount);
         updateAccountsList();
-        clearAccountForm();
+        hideAddAccountForm();
         alert('账户添加成功');
     } catch (error) {
         console.error('添加账户失败:', error);
@@ -1718,14 +1871,33 @@ function updateAccountsList() {
     accounts.forEach(account => {
         const category = categories.find(cat => cat.id === account.categoryId);
         const item = document.createElement('div');
-        item.className = 'account-item';
+        item.className = 'account-card';
         item.innerHTML = \`
-            <div class="account-info">
+            <div class="account-header">
                 <div class="account-name">\${account.name}</div>
-                <div class="account-username">\${account.username}</div>
                 \${category ? \`<span class="account-category">\${category.name}</span>\` : ''}
             </div>
-            <div>
+            <div class="account-details">
+                <div class="account-field">
+                    <span class="field-label">用户名:</span>
+                    <span class="field-value">\${account.username}</span>
+                </div>
+                <div class="account-field">
+                    <span class="field-label">密码:</span>
+                    <span class="field-value">••••••••</span>
+                </div>
+                \${account.url ? \`
+                <div class="account-field">
+                    <span class="field-label">网址:</span>
+                    <span class="field-value">\${account.url}</span>
+                </div>\` : ''}
+                \${account.notes ? \`
+                <div class="account-field">
+                    <span class="field-label">备注:</span>
+                    <span class="field-value">\${account.notes}</span>
+                </div>\` : ''}
+            </div>
+            <div class="account-actions">
                 <button class="edit-btn" onclick="editAccount('\${account.id}')">编辑</button>
                 <button class="delete-btn" onclick="deleteAccount('\${account.id}')" title="删除"></button>
             </div>

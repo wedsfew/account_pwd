@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// .wrangler/tmp/bundle-tYCJvG/checked-fetch.js
+// .wrangler/tmp/bundle-NGy0Q6/checked-fetch.js
 var urls = /* @__PURE__ */ new Set();
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
@@ -27,7 +27,7 @@ globalThis.fetch = new Proxy(globalThis.fetch, {
   }
 });
 
-// .wrangler/tmp/bundle-tYCJvG/strip-cf-connecting-ip-header.js
+// .wrangler/tmp/bundle-NGy0Q6/strip-cf-connecting-ip-header.js
 function stripCfConnectingIPHeader(input, init) {
   const request = new Request(input, init);
   request.headers.delete("CF-Connecting-IP");
@@ -508,20 +508,16 @@ function getSetupContent() {
 
         .form-group input {
             width: 100%;
-            padding: 14px 18px;
+            padding: 12px 16px;
             border: 2px solid #e2e8f0;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 16px;
-            transition: all 0.3s ease;
-            background: #f8fafc;
+            transition: border-color 0.3s ease;
         }
 
         .form-group input:focus {
             outline: none;
             border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            transform: translateY(-1px);
         }
 
         .setup-btn {
@@ -752,26 +748,12 @@ function getLoginContent() {
 
         .login-container {
             background: white;
-            border-radius: 25px;
-            padding: 45px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             width: 90%;
             max-width: 400px;
             text-align: center;
-            border: 1px solid rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        @keyframes fadeInUp {
-            from { 
-                opacity: 0; 
-                transform: translateY(30px); 
-            }
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
-            }
         }
 
         .login-header {
@@ -780,10 +762,8 @@ function getLoginContent() {
 
         .login-header h1 {
             color: #4a5568;
-            font-size: 2.2rem;
-            margin-bottom: 12px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
+            font-size: 2rem;
+            margin-bottom: 10px;
         }
 
         .login-header p {
@@ -811,20 +791,16 @@ function getLoginContent() {
 
         .form-group input {
             width: 100%;
-            padding: 14px 18px;
+            padding: 12px 16px;
             border: 2px solid #e2e8f0;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 16px;
-            transition: all 0.3s ease;
-            background: #f8fafc;
+            transition: border-color 0.3s ease;
         }
 
         .form-group input:focus {
             outline: none;
             border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            transform: translateY(-1px);
         }
 
         .login-btn {
@@ -1072,63 +1048,136 @@ function getHTMLContent() {
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="header-content">
-                <h1>\u{1F510} \u8D26\u6237\u5BC6\u7801\u7BA1\u7406\u5DE5\u5177</h1>
+    <div class="app-container">
+        <!-- \u4FA7\u8FB9\u680F -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>\u{1F510} \u5BC6\u7801\u7BA1\u7406</h1>
                 <div class="user-info">
                     <span id="userDisplay">\u6B22\u8FCE\uFF0Cadmin</span>
-                    <button onclick="showChangePassword()" class="change-pwd-btn">\u4FEE\u6539\u5BC6\u7801</button>
-                    <button onclick="logout()" class="logout-btn">\u767B\u51FA</button>
+                    <div class="user-actions">
+                        <button onclick="showChangePassword()" class="change-pwd-btn" title="\u4FEE\u6539\u5BC6\u7801">
+                            <span>\u{1F511}</span>
+                        </button>
+                        <button onclick="logout()" class="logout-btn" title="\u767B\u51FA">
+                            <span>\u{1F6AA}</span>
+                        </button>
+                    </div>
                 </div>
             </div>
-        </header>
-        
-        <div class="main-content">
+            
             <!-- \u5206\u7C7B\u7BA1\u7406 -->
-            <div class="section">
-                <h2>\u{1F4C1} \u5206\u7C7B\u7BA1\u7406</h2>
+            <div class="sidebar-section">
+                <h3>\u{1F4C1} \u5206\u7C7B\u7BA1\u7406</h3>
                 <div class="category-form">
-                    <input type="text" id="categoryName" placeholder="\u8F93\u5165\u5206\u7C7B\u540D\u79F0" maxlength="20">
-                    <button onclick="addCategory()">\u6DFB\u52A0\u5206\u7C7B</button>
+                    <div class="input-group">
+                        <input type="text" id="categoryName" placeholder="\u8F93\u5165\u5206\u7C7B\u540D\u79F0" maxlength="20">
+                        <button onclick="addCategory()" class="add-btn">+</button>
+                    </div>
                 </div>
                 <div id="categoriesList" class="categories-list"></div>
             </div>
-            
-            <!-- \u8D26\u6237\u7BA1\u7406 -->
-            <div class="section">
+        </aside>
+        
+        <!-- \u4E3B\u5185\u5BB9\u533A -->
+        <main class="main-content">
+            <div class="content-header">
                 <h2>\u{1F464} \u8D26\u6237\u7BA1\u7406</h2>
-                <div class="account-form">
-                    <select id="accountCategory" required>
-                        <option value="">\u9009\u62E9\u5206\u7C7B</option>
-                    </select>
-                    <input type="text" id="accountName" placeholder="\u8D26\u6237\u540D\u79F0" required maxlength="50">
-                    <input type="text" id="accountUsername" placeholder="\u7528\u6237\u540D" required maxlength="100">
-                    <input type="password" id="accountPassword" placeholder="\u5BC6\u7801" required maxlength="100">
-                    <input type="text" id="accountUrl" placeholder="\u7F51\u5740 (\u53EF\u9009)" maxlength="200">
-                    <textarea id="accountNotes" placeholder="\u5907\u6CE8 (\u53EF\u9009)" maxlength="500"></textarea>
-                    <button onclick="addAccount()">\u6DFB\u52A0\u8D26\u6237</button>
-                </div>
-                <div id="accountsList" class="accounts-list"></div>
+                <button onclick="showAddAccountForm()" class="add-account-btn">+ \u6DFB\u52A0\u8D26\u6237</button>
             </div>
-        </div>
+            
+            <!-- \u6DFB\u52A0\u8D26\u6237\u8868\u5355 -->
+            <div id="addAccountForm" class="add-account-form" style="display: none;">
+                <h3>\u6DFB\u52A0\u65B0\u8D26\u6237</h3>
+                <form id="accountForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="accountCategory">\u5206\u7C7B</label>
+                            <select id="accountCategory" required>
+                                <option value="">\u9009\u62E9\u5206\u7C7B</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="accountName">\u8D26\u6237\u540D\u79F0</label>
+                            <input type="text" id="accountName" placeholder="\u8D26\u6237\u540D\u79F0" required maxlength="50">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="accountUsername">\u7528\u6237\u540D</label>
+                            <input type="text" id="accountUsername" placeholder="\u7528\u6237\u540D" required maxlength="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="accountPassword">\u5BC6\u7801</label>
+                            <input type="password" id="accountPassword" placeholder="\u5BC6\u7801" required maxlength="100">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="accountUrl">\u7F51\u5740 (\u53EF\u9009)</label>
+                            <input type="text" id="accountUrl" placeholder="\u7F51\u5740" maxlength="200">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="accountNotes">\u5907\u6CE8 (\u53EF\u9009)</label>
+                        <textarea id="accountNotes" placeholder="\u5907\u6CE8\u4FE1\u606F" maxlength="500"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="save-btn">\u4FDD\u5B58\u8D26\u6237</button>
+                        <button type="button" onclick="hideAddAccountForm()" class="cancel-btn">\u53D6\u6D88</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- \u8D26\u6237\u5217\u8868 -->
+            <div id="accountsList" class="accounts-grid"></div>
+        </main>
     </div>
     
     <!-- \u7F16\u8F91\u6A21\u6001\u6846 -->
     <div id="editModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h3>\u7F16\u8F91\u8D26\u6237</h3>
+            <div class="modal-header">
+                <h3>\u7F16\u8F91\u8D26\u6237</h3>
+                <span class="close">&times;</span>
+            </div>
             <form id="editForm">
-                <select id="editCategory" required>
-                    <option value="">\u9009\u62E9\u5206\u7C7B</option>
-                </select>
-                <input type="text" id="editName" placeholder="\u8D26\u6237\u540D\u79F0" required maxlength="50">
-                <input type="text" id="editUsername" placeholder="\u7528\u6237\u540D" required maxlength="100">
-                <input type="password" id="editPassword" placeholder="\u5BC6\u7801" required maxlength="100">
-                <input type="text" id="editUrl" placeholder="\u7F51\u5740 (\u53EF\u9009)" maxlength="200">
-                <textarea id="editNotes" placeholder="\u5907\u6CE8 (\u53EF\u9009)" maxlength="500"></textarea>
-                <button type="submit">\u4FDD\u5B58</button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editCategory">\u5206\u7C7B</label>
+                        <select id="editCategory" required>
+                            <option value="">\u9009\u62E9\u5206\u7C7B</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editName">\u8D26\u6237\u540D\u79F0</label>
+                        <input type="text" id="editName" placeholder="\u8D26\u6237\u540D\u79F0" required maxlength="50">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editUsername">\u7528\u6237\u540D</label>
+                        <input type="text" id="editUsername" placeholder="\u7528\u6237\u540D" required maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="editPassword">\u5BC6\u7801</label>
+                        <input type="password" id="editPassword" placeholder="\u5BC6\u7801" required maxlength="100">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editUrl">\u7F51\u5740 (\u53EF\u9009)</label>
+                        <input type="text" id="editUrl" placeholder="\u7F51\u5740" maxlength="200">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editNotes">\u5907\u6CE8 (\u53EF\u9009)</label>
+                    <textarea id="editNotes" placeholder="\u5907\u6CE8\u4FE1\u606F" maxlength="500"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="save-btn">\u4FDD\u5B58\u66F4\u6539</button>
+                    <button type="button" onclick="closeEditModal()" class="cancel-btn">\u53D6\u6D88</button>
+                </div>
             </form>
         </div>
     </div>
@@ -1136,13 +1185,27 @@ function getHTMLContent() {
     <!-- \u4FEE\u6539\u5BC6\u7801\u6A21\u6001\u6846 -->
     <div id="changePasswordModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h3>\u4FEE\u6539\u5BC6\u7801</h3>
+            <div class="modal-header">
+                <h3>\u4FEE\u6539\u5BC6\u7801</h3>
+                <span class="close">&times;</span>
+            </div>
             <form id="changePasswordForm">
-                <input type="password" id="currentPassword" placeholder="\u5F53\u524D\u5BC6\u7801" required>
-                <input type="password" id="newPassword" placeholder="\u65B0\u5BC6\u7801" required minlength="6">
-                <input type="password" id="confirmNewPassword" placeholder="\u786E\u8BA4\u65B0\u5BC6\u7801" required minlength="6">
-                <button type="submit">\u4FEE\u6539\u5BC6\u7801</button>
+                <div class="form-group">
+                    <label for="currentPassword">\u5F53\u524D\u5BC6\u7801</label>
+                    <input type="password" id="currentPassword" placeholder="\u5F53\u524D\u5BC6\u7801" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">\u65B0\u5BC6\u7801</label>
+                    <input type="password" id="newPassword" placeholder="\u65B0\u5BC6\u7801" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="confirmNewPassword">\u786E\u8BA4\u65B0\u5BC6\u7801</label>
+                    <input type="password" id="confirmNewPassword" placeholder="\u786E\u8BA4\u65B0\u5BC6\u7801" required minlength="6">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="save-btn">\u4FEE\u6539\u5BC6\u7801</button>
+                    <button type="button" onclick="closeChangePasswordModal()" class="cancel-btn">\u53D6\u6D88</button>
+                </div>
             </form>
         </div>
     </div>
@@ -1161,341 +1224,411 @@ function getCSSContent() {
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #f8fafc;
     min-height: 100vh;
     color: #333;
-    line-height: 1.6;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    animation: fadeIn 0.5s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-header {
-    text-align: center;
-    margin-bottom: 40px;
-    position: relative;
-}
-
-header::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60px;
-    height: 3px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-    border-radius: 2px;
-}
-
-.header-content {
+.app-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 20px;
+    min-height: 100vh;
 }
 
-header h1 {
+/* \u4FA7\u8FB9\u680F\u6837\u5F0F */
+.sidebar {
+    width: 300px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    font-size: 2.5rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    margin: 0;
-    font-weight: 700;
-    letter-spacing: -0.5px;
+    padding: 0;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.sidebar-header {
+    padding: 30px 25px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header h1 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
 }
 
 .user-info {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 15px;
-    color: white;
-    font-size: 16px;
 }
 
 #userDisplay {
     font-weight: 600;
+    font-size: 16px;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
 }
 
-.change-pwd-btn {
+.user-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.change-pwd-btn, .logout-btn {
     background: rgba(255,255,255,0.15);
     color: white;
     border: 2px solid rgba(255,255,255,0.25);
-    padding: 8px 16px;
-    border-radius: 6px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 16px;
     transition: all 0.3s ease;
-    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.change-pwd-btn:hover {
+.change-pwd-btn:hover, .logout-btn:hover {
     background: rgba(255,255,255,0.25);
     border-color: rgba(255,255,255,0.4);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
 }
 
-.logout-btn {
+.sidebar-section {
+    padding: 25px;
+}
+
+.sidebar-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.category-form {
+    margin-bottom: 25px;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.input-group input::placeholder {
+    color: rgba(255,255,255,0.7);
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.15);
+}
+
+.add-btn {
     background: rgba(255,255,255,0.2);
     color: white;
     border: 2px solid rgba(255,255,255,0.3);
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.logout-btn:hover {
-    background: rgba(255,255,255,0.3);
-    border-color: rgba(255,255,255,0.5);
-    transform: translateY(-1px);
-}
-
-.main-content {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 30px;
-    animation: slideUp 0.6s ease-out 0.2s both;
-}
-
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.section {
-    background: white;
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-}
-
-.section:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-}
-
-.section h2 {
-    color: #4a5568;
-    margin-bottom: 25px;
-    font-size: 1.6rem;
-    font-weight: 600;
-    position: relative;
-    padding-bottom: 10px;
-}
-
-.section h2::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
     width: 40px;
-    height: 2px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-    border-radius: 1px;
-}
-
-/* \u8868\u5355\u6837\u5F0F */
-.category-form, .account-form {
-    margin-bottom: 25px;
-}
-
-input, select, textarea {
-    width: 100%;
-    padding: 14px 16px;
-    margin-bottom: 18px;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    background: #f8fafc;
-}
-
-input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: #667eea;
-    background: white;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    transform: translateY(-1px);
-}
-
-button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 14px 28px;
-    border-radius: 10px;
+    height: 40px;
+    border-radius: 50%;
     cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 18px;
+    font-weight: bold;
     transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.5s ease;
+.add-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.1);
 }
 
-button:hover::before {
-    left: 100%;
-}
-
-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-}
-
-/* \u5217\u8868\u6837\u5F0F */
-.categories-list, .accounts-list {
-    max-height: 400px;
+.categories-list {
+    max-height: 300px;
     overflow-y: auto;
-    padding-right: 5px;
 }
 
-.categories-list::-webkit-scrollbar, .accounts-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.categories-list::-webkit-scrollbar-track, .accounts-list::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.categories-list::-webkit-scrollbar-thumb, .accounts-list::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
-}
-
-.categories-list::-webkit-scrollbar-thumb:hover, .accounts-list::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
-
-.category-item, .account-item {
-    background: #f7fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 18px;
-    margin-bottom: 12px;
+.category-item {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
 }
 
-.category-item::before, .account-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: linear-gradient(180deg, #667eea, #764ba2);
-    transform: scaleY(0);
-    transition: transform 0.3s ease;
-}
-
-.category-item:hover::before, .account-item:hover::before {
-    transform: scaleY(1);
-}
-
-.category-item:hover, .account-item:hover {
-    background: #edf2f7;
+.category-item:hover {
+    background: rgba(255,255,255,0.15);
     transform: translateX(5px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .category-name {
     font-weight: 600;
-    color: #4a5568;
-    font-size: 15px;
-    transition: color 0.3s ease;
+    color: white;
 }
 
-.category-item:hover .category-name {
-    color: #2d3748;
-}
-
-.account-info {
+/* \u4E3B\u5185\u5BB9\u533A\u6837\u5F0F */
+.main-content {
     flex: 1;
-    padding-left: 8px;
+    margin-left: 300px;
+    padding: 30px;
+    background: #f8fafc;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.content-header h2 {
+    color: #4a5568;
+    font-size: 1.8rem;
+    margin: 0;
+}
+
+.add-account-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.add-account-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* \u6DFB\u52A0\u8D26\u6237\u8868\u5355 */
+.add-account-form {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.add-account-form h3 {
+    color: #4a5568;
+    margin-bottom: 25px;
+    font-size: 1.3rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.save-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.save-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.cancel-btn {
+    background: #e2e8f0;
+    color: #4a5568;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+    background: #cbd5e0;
+    transform: translateY(-2px);
+}
+
+/* \u8D26\u6237\u7F51\u683C */
+.accounts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.account-card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+}
+
+.account-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.account-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
 }
 
 .account-name {
     font-weight: 600;
     color: #2d3748;
-    margin-bottom: 6px;
-    font-size: 16px;
-    transition: color 0.3s ease;
-}
-
-.account-item:hover .account-name {
-    color: #1a202c;
-}
-
-.account-username {
-    color: #718096;
-    font-size: 14px;
-    transition: color 0.3s ease;
-}
-
-.account-item:hover .account-username {
-    color: #4a5568;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
 }
 
 .account-category {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: #667eea;
     color: white;
-    padding: 6px 10px;
-    border-radius: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
     font-size: 12px;
-    margin-left: 10px;
-    font-weight: 500;
-    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+    font-weight: 600;
+}
+
+.account-details {
+    margin-bottom: 20px;
+}
+
+.account-field {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f7fafc;
+}
+
+.account-field:last-child {
+    border-bottom: none;
+}
+
+.field-label {
+    font-weight: 600;
+    color: #718096;
+    width: 80px;
+    font-size: 13px;
+}
+
+.field-value {
+    color: #2d3748;
+    flex: 1;
+    font-size: 14px;
+}
+
+.account-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.edit-btn {
+    background: #3182ce;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
     transition: all 0.3s ease;
 }
 
-.account-item:hover .account-category {
-    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
-    transform: scale(1.05);
+.edit-btn:hover {
+    background: #2c5aa0;
+    transform: translateY(-1px);
 }
 
 .delete-btn {
     background: #e53e3e;
     color: white;
     border: none;
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
-    margin-left: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1516,13 +1649,13 @@ button:hover {
 .delete-btn::after {
     content: "\u5220\u9664";
     position: absolute;
-    bottom: -30px;
+    bottom: -35px;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.8);
     color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 6px 10px;
+    border-radius: 6px;
     font-size: 12px;
     white-space: nowrap;
     opacity: 0;
@@ -1536,25 +1669,6 @@ button:hover {
     visibility: visible;
 }
 
-.edit-btn {
-    background: linear-gradient(135deg, #3182ce, #4299e1);
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 12px;
-    margin-left: 8px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(49, 130, 206, 0.2);
-}
-
-.edit-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(49, 130, 206, 0.3);
-}
-
 /* \u6A21\u6001\u6846\u6837\u5F0F */
 .modal {
     display: none;
@@ -1565,106 +1679,94 @@ button:hover {
     width: 100%;
     height: 100%;
     background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
 }
 
 .modal-content {
     background-color: white;
-    margin: 5% auto;
-    padding: 35px;
+    margin: 3% auto;
     border-radius: 20px;
     width: 90%;
-    max-width: 500px;
+    max-width: 600px;
     position: relative;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-    border: 1px solid rgba(255,255,255,0.2);
-    backdrop-filter: blur(10px);
-    animation: modalSlideIn 0.3s ease-out;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    overflow: hidden;
 }
 
-@keyframes modalSlideIn {
-    from { 
-        opacity: 0; 
-        transform: translateY(-50px) scale(0.9); 
-    }
-    to { 
-        opacity: 1; 
-        transform: translateY(0) scale(1); 
-    }
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 25px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
 }
 
 .close {
-    color: #aaa;
-    float: right;
+    color: white;
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
-    position: absolute;
-    right: 20px;
-    top: 15px;
+    transition: all 0.3s ease;
 }
 
 .close:hover {
-    color: #000;
+    transform: scale(1.2);
 }
 
-.modal-content h3 {
-    margin-bottom: 25px;
-    color: #4a5568;
-    font-size: 1.4rem;
-    font-weight: 600;
-    text-align: center;
-    position: relative;
-}
-
-.modal-content h3::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 2px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-    border-radius: 1px;
+.modal-content form {
+    padding: 30px;
 }
 
 /* \u54CD\u5E94\u5F0F\u8BBE\u8BA1 */
-@media (max-width: 768px) {
-    .header-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 15px;
-    }
-    
-    header h1 {
-        font-size: 2rem;
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 250px;
     }
     
     .main-content {
+        margin-left: 250px;
+    }
+    
+    .form-row {
         grid-template-columns: 1fr;
-        gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
     }
     
-    .container {
-        padding: 15px;
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
     }
     
-    .section {
-        padding: 25px;
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+    }
+    
+    .content-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .accounts-grid {
+        grid-template-columns: 1fr;
     }
     
     .modal-content {
-        padding: 25px;
-        margin: 10% auto;
-    }
-    
-    .user-info {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .change-pwd-btn, .logout-btn {
-        margin: 0;
+        margin: 5% auto;
+        width: 95%;
     }
 }
 
@@ -1685,6 +1787,24 @@ button:hover {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
+}
+
+/* \u4FA7\u8FB9\u680F\u6EDA\u52A8\u6761 */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.1);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.5);
 }`;
 }
 __name(getCSSContent, "getCSSContent");
@@ -1734,6 +1854,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('editForm').addEventListener('submit', function(e) {
         e.preventDefault();
         saveEditedAccount();
+    });
+    
+    // \u6DFB\u52A0\u8D26\u6237\u8868\u5355\u63D0\u4EA4
+    document.getElementById('accountForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        addAccount();
     });
     
     // \u4FEE\u6539\u5BC6\u7801\u8868\u5355\u63D0\u4EA4
@@ -1794,6 +1920,23 @@ async function updateUserDisplay() {
     }
 }
 
+// \u663E\u793A\u6DFB\u52A0\u8D26\u6237\u8868\u5355
+function showAddAccountForm() {
+    document.getElementById('addAccountForm').style.display = 'block';
+    // \u6E05\u7A7A\u8868\u5355
+    document.getElementById('accountCategory').value = '';
+    document.getElementById('accountName').value = '';
+    document.getElementById('accountUsername').value = '';
+    document.getElementById('accountPassword').value = '';
+    document.getElementById('accountUrl').value = '';
+    document.getElementById('accountNotes').value = '';
+}
+
+// \u9690\u85CF\u6DFB\u52A0\u8D26\u6237\u8868\u5355
+function hideAddAccountForm() {
+    document.getElementById('addAccountForm').style.display = 'none';
+}
+
 // \u663E\u793A\u4FEE\u6539\u5BC6\u7801\u6A21\u6001\u6846
 function showChangePassword() {
     document.getElementById('changePasswordModal').style.display = 'block';
@@ -1801,6 +1944,16 @@ function showChangePassword() {
     document.getElementById('currentPassword').value = '';
     document.getElementById('newPassword').value = '';
     document.getElementById('confirmNewPassword').value = '';
+}
+
+// \u5173\u95ED\u7F16\u8F91\u6A21\u6001\u6846
+function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+}
+
+// \u5173\u95ED\u4FEE\u6539\u5BC6\u7801\u6A21\u6001\u6846
+function closeChangePasswordModal() {
+    document.getElementById('changePasswordModal').style.display = 'none';
 }
 
 // \u4FEE\u6539\u5BC6\u7801\u529F\u80FD
@@ -2020,7 +2173,7 @@ async function addAccount() {
         
         accounts.push(newAccount);
         updateAccountsList();
-        clearAccountForm();
+        hideAddAccountForm();
         alert('\u8D26\u6237\u6DFB\u52A0\u6210\u529F');
     } catch (error) {
         console.error('\u6DFB\u52A0\u8D26\u6237\u5931\u8D25:', error);
@@ -2043,14 +2196,33 @@ function updateAccountsList() {
     accounts.forEach(account => {
         const category = categories.find(cat => cat.id === account.categoryId);
         const item = document.createElement('div');
-        item.className = 'account-item';
+        item.className = 'account-card';
         item.innerHTML = \`
-            <div class="account-info">
+            <div class="account-header">
                 <div class="account-name">\${account.name}</div>
-                <div class="account-username">\${account.username}</div>
                 \${category ? \`<span class="account-category">\${category.name}</span>\` : ''}
             </div>
-            <div>
+            <div class="account-details">
+                <div class="account-field">
+                    <span class="field-label">\u7528\u6237\u540D:</span>
+                    <span class="field-value">\${account.username}</span>
+                </div>
+                <div class="account-field">
+                    <span class="field-label">\u5BC6\u7801:</span>
+                    <span class="field-value">\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022</span>
+                </div>
+                \${account.url ? \`
+                <div class="account-field">
+                    <span class="field-label">\u7F51\u5740:</span>
+                    <span class="field-value">\${account.url}</span>
+                </div>\` : ''}
+                \${account.notes ? \`
+                <div class="account-field">
+                    <span class="field-label">\u5907\u6CE8:</span>
+                    <span class="field-value">\${account.notes}</span>
+                </div>\` : ''}
+            </div>
+            <div class="account-actions">
                 <button class="edit-btn" onclick="editAccount('\${account.id}')">\u7F16\u8F91</button>
                 <button class="delete-btn" onclick="deleteAccount('\${account.id}')" title="\u5220\u9664"></button>
             </div>
@@ -2177,7 +2349,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-tYCJvG/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-NGy0Q6/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -2209,7 +2381,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-tYCJvG/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-NGy0Q6/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
