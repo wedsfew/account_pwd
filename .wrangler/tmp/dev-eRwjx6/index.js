@@ -2403,7 +2403,7 @@ function updateAccountsList() {
                 <div class="account-field">
                     <span class="field-label">\u7528\u6237\u540D:</span>
                     <span class="field-value">\${account.username}</span>
-                    <button class="copy-btn" onclick="copyToClipboard('\${account.username}', '\u7528\u6237\u540D')" title="\u590D\u5236\u7528\u6237\u540D">
+                    <button class="copy-btn" onclick="copyToClipboard('\${account.username}', '\u7528\u6237\u540D', event)" title="\u590D\u5236\u7528\u6237\u540D">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -2413,7 +2413,7 @@ function updateAccountsList() {
                 <div class="account-field">
                     <span class="field-label">\u5BC6\u7801:</span>
                     <span class="field-value">\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022</span>
-                    <button class="copy-btn" onclick="copyToClipboard('\${account.password}', '\u5BC6\u7801')" title="\u590D\u5236\u5BC6\u7801">
+                    <button class="copy-btn" onclick="copyToClipboard('\${account.password}', '\u5BC6\u7801', event)" title="\u590D\u5236\u5BC6\u7801">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -2518,7 +2518,7 @@ async function saveEditedAccount() {
 }
 
 // \u590D\u5236\u5230\u526A\u8D34\u677F\u529F\u80FD
-async function copyToClipboard(text, type) {
+async function copyToClipboard(text, type, event) {
     try {
         await navigator.clipboard.writeText(text);
         
