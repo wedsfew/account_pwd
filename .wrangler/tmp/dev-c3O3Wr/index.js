@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// .wrangler/tmp/bundle-ELSNCk/checked-fetch.js
+// .wrangler/tmp/bundle-ywgFdZ/checked-fetch.js
 var urls = /* @__PURE__ */ new Set();
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
@@ -27,7 +27,7 @@ globalThis.fetch = new Proxy(globalThis.fetch, {
   }
 });
 
-// .wrangler/tmp/bundle-ELSNCk/strip-cf-connecting-ip-header.js
+// .wrangler/tmp/bundle-ywgFdZ/strip-cf-connecting-ip-header.js
 function stripCfConnectingIPHeader(input, init) {
   const request = new Request(input, init);
   request.headers.delete("CF-Connecting-IP");
@@ -63,6 +63,129 @@ var ResponseUtil = class {
   }
 };
 __name(ResponseUtil, "ResponseUtil");
+var UserManager = class {
+  // 简单的密码哈希函数（生产环境应使用更安全的哈希算法）
+  static hashPassword(password) {
+    return btoa(password + "salt_" + Date.now());
+  }
+  // 验证密码
+  static verifyPassword(password, hashedPassword) {
+    return password === atob(hashedPassword).replace("salt_" + Date.now(), "");
+  }
+  // 检查是否已设置用户
+  static async isUserSet(env) {
+    try {
+      const userData = await env.ACCOUNT_DATA.get("user_credentials");
+      return !!userData;
+    } catch (error) {
+      return false;
+    }
+  }
+  // 创建初始用户
+  static async createInitialUser(request, env, corsHeaders) {
+    try {
+      const { username, password } = await request.json();
+      if (!username || !password) {
+        return ResponseUtil.error("Username and password are required", 400, corsHeaders);
+      }
+      if (username.length < 3) {
+        return ResponseUtil.error("Username must be at least 3 characters", 400, corsHeaders);
+      }
+      if (password.length < 6) {
+        return ResponseUtil.error("Password must be at least 6 characters", 400, corsHeaders);
+      }
+      const existingUser = await env.ACCOUNT_DATA.get("user_credentials");
+      if (existingUser) {
+        return ResponseUtil.error("User already exists", 409, corsHeaders);
+      }
+      const userData = {
+        username: username.trim(),
+        passwordHash: this.hashPassword(password),
+        createdAt: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      await env.ACCOUNT_DATA.put("user_credentials", JSON.stringify(userData));
+      return ResponseUtil.created({
+        success: true,
+        message: "Initial user created successfully"
+      }, corsHeaders);
+    } catch (error) {
+      return ResponseUtil.error("Failed to create user", 500, corsHeaders);
+    }
+  }
+  // 验证用户登录
+  static async verifyUser(request, env, corsHeaders) {
+    try {
+      const { username, password } = await request.json();
+      if (!username || !password) {
+        return ResponseUtil.error("Username and password are required", 400, corsHeaders);
+      }
+      const userData = await env.ACCOUNT_DATA.get("user_credentials", { type: "json" });
+      if (!userData) {
+        return ResponseUtil.error("No user found", 404, corsHeaders);
+      }
+      if (userData.username !== username.trim()) {
+        return ResponseUtil.error("Invalid credentials", 401, corsHeaders);
+      }
+      const isValidPassword = password === atob(userData.passwordHash).split("salt_")[0];
+      if (!isValidPassword) {
+        return ResponseUtil.error("Invalid credentials", 401, corsHeaders);
+      }
+      return ResponseUtil.success({
+        success: true,
+        username: userData.username,
+        message: "Login successful"
+      }, corsHeaders);
+    } catch (error) {
+      return ResponseUtil.error("Failed to verify user", 500, corsHeaders);
+    }
+  }
+  // 更新用户密码
+  static async updatePassword(request, env, corsHeaders) {
+    try {
+      const { currentPassword, newPassword } = await request.json();
+      if (!currentPassword || !newPassword) {
+        return ResponseUtil.error("Current password and new password are required", 400, corsHeaders);
+      }
+      if (newPassword.length < 6) {
+        return ResponseUtil.error("New password must be at least 6 characters", 400, corsHeaders);
+      }
+      const userData = await env.ACCOUNT_DATA.get("user_credentials", { type: "json" });
+      if (!userData) {
+        return ResponseUtil.error("No user found", 404, corsHeaders);
+      }
+      const isValidCurrentPassword = currentPassword === atob(userData.passwordHash).split("salt_")[0];
+      if (!isValidCurrentPassword) {
+        return ResponseUtil.error("Current password is incorrect", 401, corsHeaders);
+      }
+      userData.passwordHash = this.hashPassword(newPassword);
+      userData.updatedAt = (/* @__PURE__ */ new Date()).toISOString();
+      await env.ACCOUNT_DATA.put("user_credentials", JSON.stringify(userData));
+      return ResponseUtil.success({
+        success: true,
+        message: "Password updated successfully"
+      }, corsHeaders);
+    } catch (error) {
+      return ResponseUtil.error("Failed to update password", 500, corsHeaders);
+    }
+  }
+  // 获取用户信息
+  static async getUserInfo(env, corsHeaders) {
+    try {
+      const userData = await env.ACCOUNT_DATA.get("user_credentials", { type: "json" });
+      if (!userData) {
+        return ResponseUtil.error("No user found", 404, corsHeaders);
+      }
+      return ResponseUtil.success({
+        username: userData.username,
+        createdAt: userData.createdAt,
+        updatedAt: userData.updatedAt
+      }, corsHeaders);
+    } catch (error) {
+      return ResponseUtil.error("Failed to get user info", 500, corsHeaders);
+    }
+  }
+};
+__name(UserManager, "UserManager");
 var AccountManager = class {
   static async getAll(env, corsHeaders) {
     try {
@@ -186,6 +309,33 @@ var APIHandler = class {
         return ResponseUtil.error("Method not allowed", 405, corsHeaders);
     }
   }
+  static async handleUsers(request, env, corsHeaders) {
+    const { method } = request;
+    const url = new URL(request.url);
+    const path = url.pathname;
+    switch (method) {
+      case "POST":
+        if (path === "/api/users/setup") {
+          return await UserManager.createInitialUser(request, env, corsHeaders);
+        } else if (path === "/api/users/login") {
+          return await UserManager.verifyUser(request, env, corsHeaders);
+        } else if (path === "/api/users/password") {
+          return await UserManager.updatePassword(request, env, corsHeaders);
+        }
+        break;
+      case "GET":
+        if (path === "/api/users/info") {
+          return await UserManager.getUserInfo(env, corsHeaders);
+        } else if (path === "/api/users/check") {
+          const isUserSet = await UserManager.isUserSet(env);
+          return ResponseUtil.success({ isUserSet }, corsHeaders);
+        }
+        break;
+      default:
+        return ResponseUtil.error("Method not allowed", 405, corsHeaders);
+    }
+    return ResponseUtil.error("Not Found", 404, corsHeaders);
+  }
   static async handleAPI(request, env, corsHeaders) {
     const url = new URL(request.url);
     const path = url.pathname;
@@ -193,6 +343,8 @@ var APIHandler = class {
       return await this.handleAccounts(request, env, corsHeaders);
     } else if (path === "/api/categories") {
       return await this.handleCategories(request, env, corsHeaders);
+    } else if (path.startsWith("/api/users")) {
+      return await this.handleUsers(request, env, corsHeaders);
     }
     return ResponseUtil.error("Not Found", 404, corsHeaders);
   }
@@ -226,6 +378,14 @@ var src_default = {
 async function serveStaticFiles(request, corsHeaders) {
   const url = new URL(request.url);
   const path = url.pathname;
+  if (path === "/setup") {
+    return new Response(getSetupContent(), {
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "text/html"
+      }
+    });
+  }
   if (path === "/login") {
     return new Response(getLoginContent(), {
       headers: {
@@ -278,6 +438,290 @@ async function serveStaticFiles(request, corsHeaders) {
   });
 }
 __name(serveStaticFiles, "serveStaticFiles");
+function getSetupContent() {
+  return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>\u521D\u59CB\u8BBE\u7F6E - \u8D26\u6237\u5BC6\u7801\u7BA1\u7406\u5DE5\u5177</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .setup-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        .setup-header {
+            margin-bottom: 30px;
+        }
+
+        .setup-header h1 {
+            color: #4a5568;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .setup-header p {
+            color: #718096;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .setup-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .setup-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .setup-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .setup-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .success-message {
+            color: #38a169;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .info-box {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .info-box h3 {
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding-left: 0;
+            text-align: left;
+        }
+
+        .info-box li {
+            margin-bottom: 5px;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .info-box li:before {
+            content: "\u2022";
+            color: #667eea;
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <div class="setup-header">
+            <h1>\u{1F527} \u521D\u59CB\u8BBE\u7F6E</h1>
+            <p>\u6B22\u8FCE\u4F7F\u7528\u8D26\u6237\u5BC6\u7801\u7BA1\u7406\u5DE5\u5177\uFF01<br>\u8BF7\u521B\u5EFA\u60A8\u7684\u7BA1\u7406\u5458\u8D26\u6237\u4EE5\u5F00\u59CB\u4F7F\u7528\u3002</p>
+        </div>
+        
+        <form class="setup-form" id="setupForm">
+            <div class="form-group">
+                <label for="username">\u7528\u6237\u540D</label>
+                <input type="text" id="username" name="username" required placeholder="\u8BF7\u8F93\u5165\u7528\u6237\u540D\uFF08\u81F3\u5C113\u4E2A\u5B57\u7B26\uFF09" minlength="3">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">\u5BC6\u7801</label>
+                <input type="password" id="password" name="password" required placeholder="\u8BF7\u8F93\u5165\u5BC6\u7801\uFF08\u81F3\u5C116\u4E2A\u5B57\u7B26\uFF09" minlength="6">
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword">\u786E\u8BA4\u5BC6\u7801</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="\u8BF7\u518D\u6B21\u8F93\u5165\u5BC6\u7801" minlength="6">
+            </div>
+            
+            <button type="submit" class="setup-btn" id="setupBtn">
+                \u521B\u5EFA\u8D26\u6237
+            </button>
+            
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+        </form>
+        
+        <div class="info-box">
+            <h3>\u5B89\u5168\u63D0\u793A</h3>
+            <ul>
+                <li>\u7528\u6237\u540D\u81F3\u5C11\u9700\u89813\u4E2A\u5B57\u7B26</li>
+                <li>\u5BC6\u7801\u81F3\u5C11\u9700\u89816\u4E2A\u5B57\u7B26</li>
+                <li>\u8BF7\u4F7F\u7528\u5F3A\u5BC6\u7801\u4FDD\u62A4\u60A8\u7684\u6570\u636E</li>
+                <li>\u8BBE\u7F6E\u5B8C\u6210\u540E\u5C06\u65E0\u6CD5\u66F4\u6539\u7528\u6237\u540D</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('setupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const setupBtn = document.getElementById('setupBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            
+            // \u9690\u85CF\u4E4B\u524D\u7684\u6D88\u606F
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            // \u9A8C\u8BC1\u8F93\u5165
+            if (!username || !password || !confirmPassword) {
+                showError('\u8BF7\u586B\u5199\u6240\u6709\u5B57\u6BB5');
+                return;
+            }
+            
+            if (username.length < 3) {
+                showError('\u7528\u6237\u540D\u81F3\u5C11\u9700\u89813\u4E2A\u5B57\u7B26');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showError('\u5BC6\u7801\u81F3\u5C11\u9700\u89816\u4E2A\u5B57\u7B26');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showError('\u4E24\u6B21\u8F93\u5165\u7684\u5BC6\u7801\u4E0D\u4E00\u81F4');
+                return;
+            }
+            
+            // \u7981\u7528\u8BBE\u7F6E\u6309\u94AE
+            setupBtn.disabled = true;
+            setupBtn.textContent = '\u521B\u5EFA\u4E2D...';
+            
+            try {
+                // \u521B\u5EFA\u521D\u59CB\u7528\u6237
+                const response = await fetch('/api/users/setup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('\u8D26\u6237\u521B\u5EFA\u6210\u529F\uFF01\u6B63\u5728\u8DF3\u8F6C\u5230\u767B\u5F55\u9875\u9762...');
+                    
+                    // \u5EF6\u8FDF\u8DF3\u8F6C\u5230\u767B\u5F55\u9875\u9762
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                } else {
+                    showError(result.error || '\u521B\u5EFA\u8D26\u6237\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5');
+                }
+            } catch (error) {
+                showError('\u521B\u5EFA\u8D26\u6237\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5');
+                console.error('\u8BBE\u7F6E\u9519\u8BEF:', error);
+            } finally {
+                // \u6062\u590D\u8BBE\u7F6E\u6309\u94AE
+                setupBtn.disabled = false;
+                setupBtn.textContent = '\u521B\u5EFA\u8D26\u6237';
+            }
+        });
+        
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+        
+        function showSuccess(message) {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+        }
+    <\/script>
+</body>
+</html>`;
+}
+__name(getSetupContent, "getSetupContent");
 function getLoginContent() {
   return `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -491,7 +935,17 @@ function getLoginContent() {
             
             try {
                 // \u9A8C\u8BC1\u7528\u6237\u51ED\u636E
-                if (username === 'admin' && password === '123456') {
+                const response = await fetch('/api/users/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
                     // \u767B\u5F55\u6210\u529F
                     showSuccess('\u767B\u5F55\u6210\u529F\uFF0C\u6B63\u5728\u8DF3\u8F6C...');
                     
@@ -511,7 +965,7 @@ function getLoginContent() {
                         window.location.href = '/';
                     }, 1000);
                 } else {
-                    showError('\u7528\u6237\u540D\u6216\u5BC6\u7801\u9519\u8BEF');
+                    showError(result.error || '\u7528\u6237\u540D\u6216\u5BC6\u7801\u9519\u8BEF');
                 }
             } catch (error) {
                 showError('\u767B\u5F55\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5');
@@ -535,33 +989,48 @@ function getLoginContent() {
             successMessage.style.display = 'block';
         }
         
-        // \u68C0\u67E5\u662F\u5426\u5DF2\u7ECF\u767B\u5F55
-        window.addEventListener('load', function() {
-            const isLoggedIn = localStorage.getItem('isLoggedIn');
-            if (isLoggedIn === 'true') {
-                // \u68C0\u67E5\u767B\u5F55\u662F\u5426\u8FC7\u671F\uFF0824\u5C0F\u65F6\uFF09
-                const loginTime = parseInt(localStorage.getItem('loginTime') || '0');
-                const now = Date.now();
-                const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
+        // \u68C0\u67E5\u662F\u5426\u5DF2\u7ECF\u767B\u5F55\u6216\u9700\u8981\u521D\u59CB\u8BBE\u7F6E
+        window.addEventListener('load', async function() {
+            try {
+                // \u9996\u5148\u68C0\u67E5\u662F\u5426\u9700\u8981\u521D\u59CB\u8BBE\u7F6E
+                const setupResponse = await fetch('/api/users/check');
+                const setupResult = await setupResponse.json();
                 
-                if (hoursSinceLogin < 24) {
-                    // \u767B\u5F55\u672A\u8FC7\u671F\uFF0C\u8BBE\u7F6Ecookie\u5E76\u8DF3\u8F6C\u5230\u4E3B\u9875\u9762
-                    const expires = new Date();
-                    expires.setTime(expires.getTime() + (24 * 60 * 60 * 1000));
-                    document.cookie = \`isLoggedIn=true; expires=\${expires.toUTCString()}; path=/\`;
-                    document.cookie = \`username=\${localStorage.getItem('username') || 'admin'}; expires=\${expires.toUTCString()}; path=/\`;
-                    
-                    window.location.href = '/';
-                } else {
-                    // \u767B\u5F55\u5DF2\u8FC7\u671F\uFF0C\u6E05\u9664\u767B\u5F55\u72B6\u6001
-                    localStorage.removeItem('isLoggedIn');
-                    localStorage.removeItem('username');
-                    localStorage.removeItem('loginTime');
-                    
-                    // \u6E05\u9664cookie
-                    document.cookie = 'isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                    document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                if (!setupResult.isUserSet) {
+                    // \u9700\u8981\u521D\u59CB\u8BBE\u7F6E\uFF0C\u8DF3\u8F6C\u5230\u8BBE\u7F6E\u9875\u9762
+                    window.location.href = '/setup';
+                    return;
                 }
+                
+                // \u68C0\u67E5\u662F\u5426\u5DF2\u7ECF\u767B\u5F55
+                const isLoggedIn = localStorage.getItem('isLoggedIn');
+                if (isLoggedIn === 'true') {
+                    // \u68C0\u67E5\u767B\u5F55\u662F\u5426\u8FC7\u671F\uFF0824\u5C0F\u65F6\uFF09
+                    const loginTime = parseInt(localStorage.getItem('loginTime') || '0');
+                    const now = Date.now();
+                    const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
+                    
+                    if (hoursSinceLogin < 24) {
+                        // \u767B\u5F55\u672A\u8FC7\u671F\uFF0C\u8BBE\u7F6Ecookie\u5E76\u8DF3\u8F6C\u5230\u4E3B\u9875\u9762
+                        const expires = new Date();
+                        expires.setTime(expires.getTime() + (24 * 60 * 60 * 1000));
+                        document.cookie = \`isLoggedIn=true; expires=\${expires.toUTCString()}; path=/\`;
+                        document.cookie = \`username=\${localStorage.getItem('username') || 'admin'}; expires=\${expires.toUTCString()}; path=/\`;
+                        
+                        window.location.href = '/';
+                    } else {
+                        // \u767B\u5F55\u5DF2\u8FC7\u671F\uFF0C\u6E05\u9664\u767B\u5F55\u72B6\u6001
+                        localStorage.removeItem('isLoggedIn');
+                        localStorage.removeItem('username');
+                        localStorage.removeItem('loginTime');
+                        
+                        // \u6E05\u9664cookie
+                        document.cookie = 'isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                        document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    }
+                }
+            } catch (error) {
+                console.error('\u68C0\u67E5\u767B\u5F55\u72B6\u6001\u65F6\u51FA\u9519:', error);
             }
         });
     <\/script>
@@ -585,6 +1054,7 @@ function getHTMLContent() {
                 <h1>\u{1F510} \u8D26\u6237\u5BC6\u7801\u7BA1\u7406\u5DE5\u5177</h1>
                 <div class="user-info">
                     <span id="userDisplay">\u6B22\u8FCE\uFF0Cadmin</span>
+                    <button onclick="showChangePassword()" class="change-pwd-btn">\u4FEE\u6539\u5BC6\u7801</button>
                     <button onclick="logout()" class="logout-btn">\u767B\u51FA</button>
                 </div>
             </div>
@@ -635,6 +1105,20 @@ function getHTMLContent() {
                 <input type="text" id="editUrl" placeholder="\u7F51\u5740 (\u53EF\u9009)" maxlength="200">
                 <textarea id="editNotes" placeholder="\u5907\u6CE8 (\u53EF\u9009)" maxlength="500"></textarea>
                 <button type="submit">\u4FDD\u5B58</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- \u4FEE\u6539\u5BC6\u7801\u6A21\u6001\u6846 -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>\u4FEE\u6539\u5BC6\u7801</h3>
+            <form id="changePasswordForm">
+                <input type="password" id="currentPassword" placeholder="\u5F53\u524D\u5BC6\u7801" required>
+                <input type="password" id="newPassword" placeholder="\u65B0\u5BC6\u7801" required minlength="6">
+                <input type="password" id="confirmNewPassword" placeholder="\u786E\u8BA4\u65B0\u5BC6\u7801" required minlength="6">
+                <button type="submit">\u4FEE\u6539\u5BC6\u7801</button>
             </form>
         </div>
     </div>
@@ -695,6 +1179,25 @@ header h1 {
 #userDisplay {
     font-weight: 600;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.change-pwd-btn {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.25);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-right: 10px;
+}
+
+.change-pwd-btn:hover {
+    background: rgba(255,255,255,0.25);
+    border-color: rgba(255,255,255,0.4);
+    transform: translateY(-1px);
 }
 
 .logout-btn {
@@ -942,24 +1445,31 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    // \u66F4\u65B0\u7528\u6237\u663E\u793A
-    updateUserDisplay();
-    
     // \u521D\u59CB\u5316\u529F\u80FD
     loadCategories();
     loadAccounts();
     
-    // \u6A21\u6001\u6846\u4E8B\u4EF6
-    const modal = document.getElementById('editModal');
-    const closeBtn = document.querySelector('.close');
+    // \u66F4\u65B0\u7528\u6237\u663E\u793A
+    updateUserDisplay();
     
-    closeBtn.onclick = function() {
-        modal.style.display = 'none';
-    }
+    // \u6A21\u6001\u6846\u4E8B\u4EF6
+    const editModal = document.getElementById('editModal');
+    const changePasswordModal = document.getElementById('changePasswordModal');
+    const closeBtns = document.querySelectorAll('.close');
+    
+    closeBtns.forEach(btn => {
+        btn.onclick = function() {
+            editModal.style.display = 'none';
+            changePasswordModal.style.display = 'none';
+        }
+    });
     
     window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = 'none';
+        if (event.target == editModal) {
+            editModal.style.display = 'none';
+        }
+        if (event.target == changePasswordModal) {
+            changePasswordModal.style.display = 'none';
         }
     }
     
@@ -967,6 +1477,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('editForm').addEventListener('submit', function(e) {
         e.preventDefault();
         saveEditedAccount();
+    });
+    
+    // \u4FEE\u6539\u5BC6\u7801\u8868\u5355\u63D0\u4EA4
+    document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        changePassword();
     });
 });
 
@@ -992,11 +1508,86 @@ function checkLoginStatus() {
 }
 
 // \u66F4\u65B0\u7528\u6237\u663E\u793A
-function updateUserDisplay() {
-    const username = localStorage.getItem('username') || 'admin';
-    const userDisplay = document.getElementById('userDisplay');
-    if (userDisplay) {
-        userDisplay.textContent = \`\u6B22\u8FCE\uFF0C\${username}\`;
+async function updateUserDisplay() {
+    try {
+        const response = await fetch('/api/users/info');
+        const result = await response.json();
+        
+        if (response.ok) {
+            const userDisplay = document.getElementById('userDisplay');
+            if (userDisplay) {
+                userDisplay.textContent = \`\u6B22\u8FCE\uFF0C\${result.username}\`;
+            }
+        } else {
+            // \u5982\u679C\u83B7\u53D6\u7528\u6237\u4FE1\u606F\u5931\u8D25\uFF0C\u4F7F\u7528localStorage\u4E2D\u7684\u7528\u6237\u540D
+            const username = localStorage.getItem('username') || 'admin';
+            const userDisplay = document.getElementById('userDisplay');
+            if (userDisplay) {
+                userDisplay.textContent = \`\u6B22\u8FCE\uFF0C\${username}\`;
+            }
+        }
+    } catch (error) {
+        console.error('\u83B7\u53D6\u7528\u6237\u4FE1\u606F\u5931\u8D25:', error);
+        // \u4F7F\u7528localStorage\u4E2D\u7684\u7528\u6237\u540D\u4F5C\u4E3A\u540E\u5907
+        const username = localStorage.getItem('username') || 'admin';
+        const userDisplay = document.getElementById('userDisplay');
+        if (userDisplay) {
+            userDisplay.textContent = \`\u6B22\u8FCE\uFF0C\${username}\`;
+        }
+    }
+}
+
+// \u663E\u793A\u4FEE\u6539\u5BC6\u7801\u6A21\u6001\u6846
+function showChangePassword() {
+    document.getElementById('changePasswordModal').style.display = 'block';
+    // \u6E05\u7A7A\u8868\u5355
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmNewPassword').value = '';
+}
+
+// \u4FEE\u6539\u5BC6\u7801\u529F\u80FD
+async function changePassword() {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+    
+    // \u9A8C\u8BC1\u8F93\u5165
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+        alert('\u8BF7\u586B\u5199\u6240\u6709\u5B57\u6BB5');
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        alert('\u65B0\u5BC6\u7801\u81F3\u5C11\u9700\u89816\u4E2A\u5B57\u7B26');
+        return;
+    }
+    
+    if (newPassword !== confirmNewPassword) {
+        alert('\u4E24\u6B21\u8F93\u5165\u7684\u65B0\u5BC6\u7801\u4E0D\u4E00\u81F4');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/users/password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ currentPassword, newPassword })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            alert('\u5BC6\u7801\u4FEE\u6539\u6210\u529F\uFF01');
+            document.getElementById('changePasswordModal').style.display = 'none';
+        } else {
+            alert(result.error || '\u5BC6\u7801\u4FEE\u6539\u5931\u8D25');
+        }
+    } catch (error) {
+        alert('\u5BC6\u7801\u4FEE\u6539\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5');
+        console.error('\u4FEE\u6539\u5BC6\u7801\u9519\u8BEF:', error);
     }
 }
 
@@ -1329,7 +1920,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-ELSNCk/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-ywgFdZ/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -1361,7 +1952,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-ELSNCk/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-ywgFdZ/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

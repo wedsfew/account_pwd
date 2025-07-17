@@ -37,6 +37,16 @@ async function serveStaticFiles(request, corsHeaders) {
   const url = new URL(request.url);
   const path = url.pathname;
   
+  // 设置页面 - 首次访问时创建用户
+  if (path === '/setup') {
+    return new Response(getSetupContent(), {
+      headers: { 
+        ...corsHeaders, 
+        'Content-Type': 'text/html' 
+      }
+    });
+  }
+  
   // 登录页面
   if (path === '/login') {
     return new Response(getLoginContent(), {
@@ -101,6 +111,290 @@ async function serveStaticFiles(request, corsHeaders) {
       'Location': '/login'
     }
   });
+}
+
+function getSetupContent() {
+  return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>初始设置 - 账户密码管理工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .setup-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        .setup-header {
+            margin-bottom: 30px;
+        }
+
+        .setup-header h1 {
+            color: #4a5568;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .setup-header p {
+            color: #718096;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .setup-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .setup-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .setup-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .setup-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .success-message {
+            color: #38a169;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .info-box {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .info-box h3 {
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding-left: 0;
+            text-align: left;
+        }
+
+        .info-box li {
+            margin-bottom: 5px;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .info-box li:before {
+            content: "•";
+            color: #667eea;
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <div class="setup-header">
+            <h1>🔧 初始设置</h1>
+            <p>欢迎使用账户密码管理工具！<br>请创建您的管理员账户以开始使用。</p>
+        </div>
+        
+        <form class="setup-form" id="setupForm">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" name="username" required placeholder="请输入用户名（至少3个字符）" minlength="3">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" name="password" required placeholder="请输入密码（至少6个字符）" minlength="6">
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword">确认密码</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="请再次输入密码" minlength="6">
+            </div>
+            
+            <button type="submit" class="setup-btn" id="setupBtn">
+                创建账户
+            </button>
+            
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+        </form>
+        
+        <div class="info-box">
+            <h3>安全提示</h3>
+            <ul>
+                <li>用户名至少需要3个字符</li>
+                <li>密码至少需要6个字符</li>
+                <li>请使用强密码保护您的数据</li>
+                <li>设置完成后将无法更改用户名</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('setupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const setupBtn = document.getElementById('setupBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            
+            // 隐藏之前的消息
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            // 验证输入
+            if (!username || !password || !confirmPassword) {
+                showError('请填写所有字段');
+                return;
+            }
+            
+            if (username.length < 3) {
+                showError('用户名至少需要3个字符');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showError('密码至少需要6个字符');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showError('两次输入的密码不一致');
+                return;
+            }
+            
+            // 禁用设置按钮
+            setupBtn.disabled = true;
+            setupBtn.textContent = '创建中...';
+            
+            try {
+                // 创建初始用户
+                const response = await fetch('/api/users/setup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('账户创建成功！正在跳转到登录页面...');
+                    
+                    // 延迟跳转到登录页面
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                } else {
+                    showError(result.error || '创建账户失败，请重试');
+                }
+            } catch (error) {
+                showError('创建账户失败，请重试');
+                console.error('设置错误:', error);
+            } finally {
+                // 恢复设置按钮
+                setupBtn.disabled = false;
+                setupBtn.textContent = '创建账户';
+            }
+        });
+        
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+        
+        function showSuccess(message) {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+        }
+    </script>
+</body>
+</html>`;
 }
 
 function getLoginContent() {
@@ -316,7 +610,17 @@ function getLoginContent() {
             
             try {
                 // 验证用户凭据
-                if (username === 'admin' && password === '123456') {
+                const response = await fetch('/api/users/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
                     // 登录成功
                     showSuccess('登录成功，正在跳转...');
                     
@@ -336,7 +640,7 @@ function getLoginContent() {
                         window.location.href = '/';
                     }, 1000);
                 } else {
-                    showError('用户名或密码错误');
+                    showError(result.error || '用户名或密码错误');
                 }
             } catch (error) {
                 showError('登录失败，请重试');
@@ -360,33 +664,48 @@ function getLoginContent() {
             successMessage.style.display = 'block';
         }
         
-        // 检查是否已经登录
-        window.addEventListener('load', function() {
-            const isLoggedIn = localStorage.getItem('isLoggedIn');
-            if (isLoggedIn === 'true') {
-                // 检查登录是否过期（24小时）
-                const loginTime = parseInt(localStorage.getItem('loginTime') || '0');
-                const now = Date.now();
-                const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
+        // 检查是否已经登录或需要初始设置
+        window.addEventListener('load', async function() {
+            try {
+                // 首先检查是否需要初始设置
+                const setupResponse = await fetch('/api/users/check');
+                const setupResult = await setupResponse.json();
                 
-                if (hoursSinceLogin < 24) {
-                    // 登录未过期，设置cookie并跳转到主页面
-                    const expires = new Date();
-                    expires.setTime(expires.getTime() + (24 * 60 * 60 * 1000));
-                    document.cookie = \`isLoggedIn=true; expires=\${expires.toUTCString()}; path=/\`;
-                    document.cookie = \`username=\${localStorage.getItem('username') || 'admin'}; expires=\${expires.toUTCString()}; path=/\`;
-                    
-                    window.location.href = '/';
-                } else {
-                    // 登录已过期，清除登录状态
-                    localStorage.removeItem('isLoggedIn');
-                    localStorage.removeItem('username');
-                    localStorage.removeItem('loginTime');
-                    
-                    // 清除cookie
-                    document.cookie = 'isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                    document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                if (!setupResult.isUserSet) {
+                    // 需要初始设置，跳转到设置页面
+                    window.location.href = '/setup';
+                    return;
                 }
+                
+                // 检查是否已经登录
+                const isLoggedIn = localStorage.getItem('isLoggedIn');
+                if (isLoggedIn === 'true') {
+                    // 检查登录是否过期（24小时）
+                    const loginTime = parseInt(localStorage.getItem('loginTime') || '0');
+                    const now = Date.now();
+                    const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
+                    
+                    if (hoursSinceLogin < 24) {
+                        // 登录未过期，设置cookie并跳转到主页面
+                        const expires = new Date();
+                        expires.setTime(expires.getTime() + (24 * 60 * 60 * 1000));
+                        document.cookie = \`isLoggedIn=true; expires=\${expires.toUTCString()}; path=/\`;
+                        document.cookie = \`username=\${localStorage.getItem('username') || 'admin'}; expires=\${expires.toUTCString()}; path=/\`;
+                        
+                        window.location.href = '/';
+                    } else {
+                        // 登录已过期，清除登录状态
+                        localStorage.removeItem('isLoggedIn');
+                        localStorage.removeItem('username');
+                        localStorage.removeItem('loginTime');
+                        
+                        // 清除cookie
+                        document.cookie = 'isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                        document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    }
+                }
+            } catch (error) {
+                console.error('检查登录状态时出错:', error);
             }
         });
     </script>
@@ -410,6 +729,7 @@ function getHTMLContent() {
                 <h1>🔐 账户密码管理工具</h1>
                 <div class="user-info">
                     <span id="userDisplay">欢迎，admin</span>
+                    <button onclick="showChangePassword()" class="change-pwd-btn">修改密码</button>
                     <button onclick="logout()" class="logout-btn">登出</button>
                 </div>
             </div>
@@ -460,6 +780,20 @@ function getHTMLContent() {
                 <input type="text" id="editUrl" placeholder="网址 (可选)" maxlength="200">
                 <textarea id="editNotes" placeholder="备注 (可选)" maxlength="500"></textarea>
                 <button type="submit">保存</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 修改密码模态框 -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>修改密码</h3>
+            <form id="changePasswordForm">
+                <input type="password" id="currentPassword" placeholder="当前密码" required>
+                <input type="password" id="newPassword" placeholder="新密码" required minlength="6">
+                <input type="password" id="confirmNewPassword" placeholder="确认新密码" required minlength="6">
+                <button type="submit">修改密码</button>
             </form>
         </div>
     </div>
@@ -520,6 +854,25 @@ header h1 {
 #userDisplay {
     font-weight: 600;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.change-pwd-btn {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.25);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-right: 10px;
+}
+
+.change-pwd-btn:hover {
+    background: rgba(255,255,255,0.25);
+    border-color: rgba(255,255,255,0.4);
+    transform: translateY(-1px);
 }
 
 .logout-btn {
@@ -767,24 +1120,31 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    // 更新用户显示
-    updateUserDisplay();
-    
     // 初始化功能
     loadCategories();
     loadAccounts();
     
-    // 模态框事件
-    const modal = document.getElementById('editModal');
-    const closeBtn = document.querySelector('.close');
+    // 更新用户显示
+    updateUserDisplay();
     
-    closeBtn.onclick = function() {
-        modal.style.display = 'none';
-    }
+    // 模态框事件
+    const editModal = document.getElementById('editModal');
+    const changePasswordModal = document.getElementById('changePasswordModal');
+    const closeBtns = document.querySelectorAll('.close');
+    
+    closeBtns.forEach(btn => {
+        btn.onclick = function() {
+            editModal.style.display = 'none';
+            changePasswordModal.style.display = 'none';
+        }
+    });
     
     window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = 'none';
+        if (event.target == editModal) {
+            editModal.style.display = 'none';
+        }
+        if (event.target == changePasswordModal) {
+            changePasswordModal.style.display = 'none';
         }
     }
     
@@ -792,6 +1152,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('editForm').addEventListener('submit', function(e) {
         e.preventDefault();
         saveEditedAccount();
+    });
+    
+    // 修改密码表单提交
+    document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        changePassword();
     });
 });
 
@@ -817,11 +1183,86 @@ function checkLoginStatus() {
 }
 
 // 更新用户显示
-function updateUserDisplay() {
-    const username = localStorage.getItem('username') || 'admin';
-    const userDisplay = document.getElementById('userDisplay');
-    if (userDisplay) {
-        userDisplay.textContent = \`欢迎，\${username}\`;
+async function updateUserDisplay() {
+    try {
+        const response = await fetch('/api/users/info');
+        const result = await response.json();
+        
+        if (response.ok) {
+            const userDisplay = document.getElementById('userDisplay');
+            if (userDisplay) {
+                userDisplay.textContent = \`欢迎，\${result.username}\`;
+            }
+        } else {
+            // 如果获取用户信息失败，使用localStorage中的用户名
+            const username = localStorage.getItem('username') || 'admin';
+            const userDisplay = document.getElementById('userDisplay');
+            if (userDisplay) {
+                userDisplay.textContent = \`欢迎，\${username}\`;
+            }
+        }
+    } catch (error) {
+        console.error('获取用户信息失败:', error);
+        // 使用localStorage中的用户名作为后备
+        const username = localStorage.getItem('username') || 'admin';
+        const userDisplay = document.getElementById('userDisplay');
+        if (userDisplay) {
+            userDisplay.textContent = \`欢迎，\${username}\`;
+        }
+    }
+}
+
+// 显示修改密码模态框
+function showChangePassword() {
+    document.getElementById('changePasswordModal').style.display = 'block';
+    // 清空表单
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmNewPassword').value = '';
+}
+
+// 修改密码功能
+async function changePassword() {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+    
+    // 验证输入
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+        alert('请填写所有字段');
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        alert('新密码至少需要6个字符');
+        return;
+    }
+    
+    if (newPassword !== confirmNewPassword) {
+        alert('两次输入的新密码不一致');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/users/password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ currentPassword, newPassword })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            alert('密码修改成功！');
+            document.getElementById('changePasswordModal').style.display = 'none';
+        } else {
+            alert(result.error || '密码修改失败');
+        }
+    } catch (error) {
+        alert('密码修改失败，请重试');
+        console.error('修改密码错误:', error);
     }
 }
 
