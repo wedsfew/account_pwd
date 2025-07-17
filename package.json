@@ -1,26 +1,17 @@
 {
   "name": "account-pwd-manager",
   "version": "1.0.0",
-  "description": "账号密码管理系统 - 基于Cloudflare Workers和KV存储",
-  "main": "src/worker.js",
+  "description": "账户密码管理工具",
+  "main": "index.js",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "build": "echo 'No build step required for this project'",
-    "test": "echo 'Tests will be implemented'"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "password-manager",
-    "cloudflare-workers",
-    "kv-storage",
-    "web-app"
-  ],
-  "author": "Your Name",
+  "keywords": ["password", "manager", "cloudflare", "worker"],
+  "author": "",
   "license": "MIT",
   "devDependencies": {
-    "wrangler": "^4.24.4"
-  },
-  "engines": {
-    "node": ">=16.0.0"
+    "wrangler": "^3.0.0"
   }
-}
+} 

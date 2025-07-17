@@ -1,17 +1,8 @@
 name = "account-pwd-manager"
-main = "src/worker.js"
+main = "src/index.js"
 compatibility_date = "2024-01-01"
-
-[env.production]
-name = "account-pwd-manager-prod"
-
-[env.staging]
-name = "account-pwd-manager-staging"
 
 [[kv_namespaces]]
 binding = "ACCOUNT_DATA"
-id = "your-kv-namespace-id"
-preview_id = "your-preview-kv-namespace-id"
-
-[site]
-bucket = "./src" 
+id = "41873ec821814ed28aa4692fad60f69b"
+preview_id = "41873ec821814ed28aa4692fad60f69b" 

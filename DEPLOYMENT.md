@@ -1,198 +1,168 @@
-# 部署说明
-
-本文档详细说明如何将账号密码管理系统部署到Cloudflare Workers。
+# 部署指南
 
 ## 前置要求
 
-1. **Cloudflare账户**
-   - 注册Cloudflare账户
-   - 获取Account ID
-   - 创建API Token
+1. 安装 Node.js (版本 16 或更高)
+2. 安装 Wrangler CLI
+3. 拥有 Cloudflare 账户
 
-2. **GitHub账户**
-   - 创建GitHub仓库
-   - 配置GitHub Secrets
-
-3. **Node.js环境**
-   - 安装Node.js 18+
-   - 安装Wrangler CLI
-
-## 步骤1：配置Cloudflare
-
-### 1.1 创建KV命名空间
+## 安装 Wrangler CLI
 
 ```bash
-# 安装Wrangler CLI
 npm install -g wrangler
+```
 
-# 登录Cloudflare
+## 登录 Cloudflare
+
+```bash
 wrangler login
+```
 
-# 创建KV命名空间
+## 创建 KV 命名空间
+
+### 方法一：使用 Wrangler CLI
+
+```bash
+# 创建生产环境 KV 命名空间
 wrangler kv:namespace create "ACCOUNT_DATA"
+
+# 创建预览环境 KV 命名空间
 wrangler kv:namespace create "ACCOUNT_DATA" --preview
 ```
 
-### 1.2 获取Account ID
+### 方法二：使用 Cloudflare Dashboard
 
-在Cloudflare仪表板中：
-1. 进入Workers & Pages
-2. 查看右侧的Account ID
+1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com)
+2. 进入 Workers & Pages
+3. 点击 "KV" 标签
+4. 点击 "Create a namespace"
+5. 输入名称 "ACCOUNT_DATA"
+6. 复制生成的 ID
 
-### 1.3 创建API Token
+## 配置项目
 
-1. 进入Cloudflare仪表板
-2. 点击右上角头像 → My Profile
-3. 选择API Tokens
-4. 创建Custom Token：
-   - Permissions: Account → Workers Scripts → Edit
-   - Permissions: Account → Workers Routes → Edit
-   - Permissions: Account → Workers KV Storage → Edit
-   - Zone Resources: Include → All zones
+### 1. 更新 wrangler.toml
 
-## 步骤2：配置项目
-
-### 2.1 更新wrangler.toml
-
-将生成的KV命名空间ID更新到`wrangler.toml`：
+将生成的 KV 命名空间 ID 更新到 `wrangler.toml` 文件中：
 
 ```toml
+name = "account-pwd-manager"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
 [[kv_namespaces]]
 binding = "ACCOUNT_DATA"
-id = "你的KV命名空间ID"
-preview_id = "你的预览KV命名空间ID"
+id = "your-production-kv-namespace-id"
+preview_id = "your-preview-kv-namespace-id"
 ```
 
-### 2.2 配置GitHub Secrets
-
-在GitHub仓库设置中添加以下Secrets：
-
-- `CLOUDFLARE_API_TOKEN`: 你的Cloudflare API Token
-- `CLOUDFLARE_ACCOUNT_ID`: 你的Cloudflare Account ID
-
-## 步骤3：本地测试
-
-### 3.1 安装依赖
+### 2. 安装项目依赖
 
 ```bash
 npm install
 ```
 
-### 3.2 本地开发
+## 本地开发
 
 ```bash
-# 启动本地开发服务器
 npm run dev
 ```
 
-### 3.3 本地部署测试
+访问 `http://localhost:8787` 查看应用。
+
+## 部署到 Cloudflare
+
+### 部署到生产环境
 
 ```bash
-# 部署到Cloudflare
 npm run deploy
 ```
 
-## 步骤4：GitHub部署
-
-### 4.1 推送代码
+### 部署到预览环境
 
 ```bash
-git add .
-git commit -m "Initial commit"
-git push origin main
+wrangler deploy --env preview
 ```
 
-### 4.2 自动部署
+## 验证部署
 
-GitHub Actions将自动：
-1. 检测到main分支的推送
-2. 运行部署工作流
-3. 部署到Cloudflare Workers
-
-## 步骤5：配置自定义域名（可选）
-
-1. 在Cloudflare仪表板中
-2. 进入Workers & Pages
-3. 选择你的Worker
-4. 点击Settings → Triggers
-5. 添加自定义域名
+1. 访问你的 Worker URL (例如: `https://account-pwd-manager.your-subdomain.workers.dev`)
+2. 测试添加分类功能
+3. 测试添加账户功能
+4. 测试编辑和删除功能
 
 ## 故障排除
 
 ### 常见问题
 
-1. **KV命名空间错误**
-   - 确保KV命名空间ID正确
-   - 检查权限设置
+1. **KV 绑定错误**
+   - 确保 KV 命名空间 ID 正确
+   - 确保已正确绑定 KV 命名空间
 
-2. **API Token权限不足**
-   - 确保Token有足够的权限
-   - 重新生成Token
+2. **CORS 错误**
+   - 检查 CORS 头设置
+   - 确保前端请求包含正确的 Content-Type
 
 3. **部署失败**
-   - 检查GitHub Secrets配置
-   - 查看GitHub Actions日志
+   - 检查 wrangler.toml 配置
+   - 确保已登录 Cloudflare
+   - 检查网络连接
 
-### 调试命令
+### 调试技巧
 
-```bash
-# 查看Worker日志
-wrangler tail
+1. 使用 `wrangler tail` 查看实时日志
+2. 在 Cloudflare Dashboard 中查看 Worker 日志
+3. 使用浏览器开发者工具检查网络请求
 
-# 测试API
-curl https://your-worker.your-subdomain.workers.dev/api/health
+## 自定义域名
 
-# 查看KV数据
-wrangler kv:key list --binding=ACCOUNT_DATA
+1. 在 Cloudflare Dashboard 中添加自定义域名
+2. 配置 DNS 记录指向你的 Worker
+3. 更新 wrangler.toml 中的路由配置
+
+## 环境变量
+
+如果需要添加环境变量，可以在 wrangler.toml 中配置：
+
+```toml
+[vars]
+ENVIRONMENT = "production"
 ```
 
-## 安全注意事项
+## 备份和恢复
 
-1. **API Token安全**
-   - 不要在代码中硬编码Token
-   - 定期轮换Token
+### 备份 KV 数据
 
-2. **数据加密**
-   - 考虑在客户端加密敏感数据
-   - 使用HTTPS传输
+```bash
+wrangler kv:key list --binding=ACCOUNT_DATA
+wrangler kv:key get --binding=ACCOUNT_DATA "accounts"
+wrangler kv:key get --binding=ACCOUNT_DATA "categories"
+```
 
-3. **访问控制**
-   - 考虑添加身份验证
-   - 限制API访问频率
+### 恢复 KV 数据
+
+```bash
+wrangler kv:key put --binding=ACCOUNT_DATA "accounts" "your-accounts-data"
+wrangler kv:key put --binding=ACCOUNT_DATA "categories" "your-categories-data"
+```
+
+## 性能优化
+
+1. 启用 Cloudflare 缓存
+2. 使用 CDN 加速静态资源
+3. 优化 Worker 代码减少执行时间
+
+## 安全建议
+
+1. 添加用户认证
+2. 实现密码加密存储
+3. 添加请求频率限制
+4. 使用 HTTPS 强制重定向
+5. 定期更新依赖包
 
 ## 监控和维护
 
-1. **性能监控**
-   - 使用Cloudflare Analytics
-   - 监控Worker执行时间
-
-2. **错误监控**
-   - 设置错误告警
-   - 定期检查日志
-
-3. **数据备份**
-   - 定期导出KV数据
-   - 设置数据备份策略
-
-## 更新部署
-
-### 自动更新
-
-推送代码到main分支将自动触发部署。
-
-### 手动更新
-
-```bash
-# 手动部署
-npm run deploy
-
-# 或使用wrangler
-wrangler deploy
-```
-
-## 联系支持
-
-如果遇到问题：
-1. 查看Cloudflare文档
-2. 检查GitHub Actions日志
-3. 查看Worker错误日志 
+1. 设置 Cloudflare Analytics
+2. 监控 Worker 执行时间
+3. 定期检查 KV 存储使用情况
+4. 备份重要数据 
