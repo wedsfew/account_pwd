@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>账号密码管理系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-shield-alt"></i> 账号密码管理系统</h1>
+            <p class="subtitle">安全存储您的账号密码信息</p>
+        </header>
+
+        <div class="main-content">
+            <!-- 分类管理区域 -->
+            <div class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-tags"></i> 账户分类管理</h2>
+                    <button class="btn btn-primary" onclick="showAddCategoryModal()">
+                        <i class="fas fa-plus"></i> 添加分类
+                    </button>
+                </div>
+                <div class="categories-container" id="categoriesContainer">
+                    <!-- 分类列表将在这里动态生成 -->
+                </div>
+            </div>
+
+            <!-- 账号密码管理区域 -->
+            <div class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-key"></i> 账号密码管理</h2>
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="搜索账号..." onkeyup="searchAccounts()">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <button class="btn btn-primary" onclick="showAddAccountModal()">
+                        <i class="fas fa-plus"></i> 添加账号
+                    </button>
+                </div>
+                <div class="accounts-container" id="accountsContainer">
+                    <!-- 账号列表将在这里动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加分类模态框 -->
+    <div id="addCategoryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加账户分类</h3>
+                <span class="close" onclick="closeModal('addCategoryModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="addCategoryForm">
+                    <div class="form-group">
+                        <label for="categoryName">分类名称:</label>
+                        <input type="text" id="categoryName" required placeholder="例如：信用卡、QQ、百度等">
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryIcon">分类图标:</label>
+                        <select id="categoryIcon">
+                            <option value="fas fa-credit-card">信用卡</option>
+                            <option value="fab fa-qq">QQ</option>
+                            <option value="fas fa-download">迅雷</option>
+                            <option value="fas fa-search">百度</option>
+                            <option value="fas fa-shopping-cart">购物</option>
+                            <option value="fas fa-gamepad">游戏</option>
+                            <option value="fas fa-briefcase">工作</option>
+                            <option value="fas fa-graduation-cap">学习</option>
+                            <option value="fas fa-tag">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('addCategoryModal')">取消</button>
+                        <button type="submit" class="btn btn-primary">添加分类</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加账号模态框 -->
+    <div id="addAccountModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加账号密码</h3>
+                <span class="close" onclick="closeModal('addAccountModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="addAccountForm">
+                    <div class="form-group">
+                        <label for="accountCategory">选择分类:</label>
+                        <select id="accountCategory" required>
+                            <option value="">请选择分类</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="accountName">账号名称:</label>
+                        <input type="text" id="accountName" required placeholder="例如：我的QQ账号">
+                    </div>
+                    <div class="form-group">
+                        <label for="accountUsername">用户名/账号:</label>
+                        <input type="text" id="accountUsername" required placeholder="输入用户名或账号">
+                    </div>
+                    <div class="form-group">
+                        <label for="accountPassword">密码:</label>
+                        <div class="password-input">
+                            <input type="password" id="accountPassword" required placeholder="输入密码">
+                            <button type="button" class="toggle-password" onclick="togglePassword('accountPassword')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="accountUrl">网站地址 (可选):</label>
+                        <input type="url" id="accountUrl" placeholder="https://example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="accountNotes">备注 (可选):</label>
+                        <textarea id="accountNotes" placeholder="添加备注信息"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('addAccountModal')">取消</button>
+                        <button type="submit" class="btn btn-primary">添加账号</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑账号模态框 -->
+    <div id="editAccountModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑账号密码</h3>
+                <span class="close" onclick="closeModal('editAccountModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editAccountForm">
+                    <input type="hidden" id="editAccountId">
+                    <div class="form-group">
+                        <label for="editAccountCategory">选择分类:</label>
+                        <select id="editAccountCategory" required>
+                            <option value="">请选择分类</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAccountName">账号名称:</label>
+                        <input type="text" id="editAccountName" required placeholder="例如：我的QQ账号">
+                    </div>
+                    <div class="form-group">
+                        <label for="editAccountUsername">用户名/账号:</label>
+                        <input type="text" id="editAccountUsername" required placeholder="输入用户名或账号">
+                    </div>
+                    <div class="form-group">
+                        <label for="editAccountPassword">密码:</label>
+                        <div class="password-input">
+                            <input type="password" id="editAccountPassword" required placeholder="输入密码">
+                            <button type="button" class="toggle-password" onclick="togglePassword('editAccountPassword')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAccountUrl">网站地址 (可选):</label>
+                        <input type="url" id="editAccountUrl" placeholder="https://example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="editAccountNotes">备注 (可选):</label>
+                        <textarea id="editAccountNotes" placeholder="添加备注信息"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('editAccountModal')">取消</button>
+                        <button type="submit" class="btn btn-primary">保存修改</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认删除模态框 -->
+    <div id="confirmDeleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>确认删除</h3>
+                <span class="close" onclick="closeModal('confirmDeleteModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="deleteConfirmMessage">确定要删除这个项目吗？</p>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('confirmDeleteModal')">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">确认删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知提示 -->
+    <div id="notification" class="notification"></div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
