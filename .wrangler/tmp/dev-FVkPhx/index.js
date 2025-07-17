@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// .wrangler/tmp/bundle-WqPOh3/checked-fetch.js
+// .wrangler/tmp/bundle-REs1Xv/checked-fetch.js
 var urls = /* @__PURE__ */ new Set();
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
@@ -27,7 +27,7 @@ globalThis.fetch = new Proxy(globalThis.fetch, {
   }
 });
 
-// .wrangler/tmp/bundle-WqPOh3/strip-cf-connecting-ip-header.js
+// .wrangler/tmp/bundle-REs1Xv/strip-cf-connecting-ip-header.js
 function stripCfConnectingIPHeader(input, init) {
   const request = new Request(input, init);
   request.headers.delete("CF-Connecting-IP");
@@ -1576,56 +1576,58 @@ body {
 /* \u8D26\u6237\u7F51\u683C */
 .accounts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
 }
 
 .account-card {
     background: white;
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-    transition: all 0.3s ease;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid #e2e8f0;
+    cursor: pointer;
 }
 
 .account-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    border-color: #667eea;
 }
 
 .account-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
 }
 
 .account-name {
     font-weight: 600;
     color: #2d3748;
-    font-size: 1.1rem;
-    margin-bottom: 5px;
+    font-size: 1rem;
+    margin-bottom: 4px;
 }
 
 .account-category {
     background: #667eea;
     color: white;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 16px;
+    font-size: 11px;
     font-weight: 600;
 }
 
 .account-details {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .account-field {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
-    padding: 8px 0;
+    margin-bottom: 8px;
+    padding: 6px 0;
     border-bottom: 1px solid #f7fafc;
 }
 
@@ -1636,19 +1638,19 @@ body {
 .field-label {
     font-weight: 600;
     color: #718096;
-    width: 80px;
-    font-size: 13px;
+    width: 70px;
+    font-size: 12px;
 }
 
 .field-value {
     color: #2d3748;
     flex: 1;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .account-actions {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     justify-content: flex-end;
 }
 
@@ -1656,10 +1658,10 @@ body {
     background: #3182ce;
     color: white;
     border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
+    padding: 6px 12px;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     transition: all 0.3s ease;
 }
@@ -2491,7 +2493,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-WqPOh3/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-REs1Xv/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -2523,7 +2525,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-WqPOh3/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-REs1Xv/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
