@@ -1053,6 +1053,56 @@ body {
     transform: translateX(5px);
 }
 
+.category-filter {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.category-filter.active {
+    background: rgba(255,255,255,0.25);
+    border-left: 4px solid #fff;
+    transform: translateX(5px);
+}
+
+.category-filter:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.category-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.category-count {
+    font-size: 12px;
+    color: rgba(255,255,255,0.8);
+    font-weight: 500;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #718096;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    color: #4a5568;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+}
+
+.empty-state p {
+    margin-bottom: 25px;
+    font-size: 14px;
+}
+
 .category-name {
     font-weight: 600;
     color: white;
@@ -1504,6 +1554,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // 更新用户显示
     updateUserDisplay();
     
+    // 初始化筛选状态
+    setTimeout(() => {
+        updateContentHeader();
+    }, 100);
+    
     // 模态框事件
     const editModal = document.getElementById('editModal');
     const changePasswordModal = document.getElementById('changePasswordModal');
@@ -1591,6 +1646,43 @@ async function updateUserDisplay() {
         const userDisplay = document.getElementById('userDisplay');
         if (userDisplay) {
             userDisplay.textContent = \`欢迎，\${username}\`;
+        }
+    }
+}
+
+// 全局变量：当前选中的分类
+let currentCategoryFilter = 'all';
+
+// 筛选账户函数
+function filterAccountsByCategory(categoryId) {
+    currentCategoryFilter = categoryId;
+    
+    // 更新分类项的激活状态
+    document.querySelectorAll('.category-filter').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    const activeItem = document.querySelector(\`[data-category-id="\${categoryId}"]\`);
+    if (activeItem) {
+        activeItem.classList.add('active');
+    }
+    
+    // 更新账户列表
+    updateAccountsList();
+    
+    // 更新内容标题
+    updateContentHeader();
+}
+
+// 更新内容标题
+function updateContentHeader() {
+    const header = document.querySelector('.content-header h2');
+    if (currentCategoryFilter === 'all') {
+        header.textContent = '👤 账户管理';
+    } else {
+        const category = categories.find(cat => cat.id === currentCategoryFilter);
+        if (category) {
+            header.textContent = \`👤 \${category.name} 账户\`;
         }
     }
 }
@@ -1767,9 +1859,15 @@ async function deleteCategory(id) {
         accounts = accounts.filter(acc => acc.categoryId !== id);
         categories = categories.filter(cat => cat.id !== id);
         
+        // 如果删除的是当前选中的分类，重置为全部
+        if (currentCategoryFilter === id) {
+            currentCategoryFilter = 'all';
+        }
+        
         updateCategoriesList();
         updateCategorySelects();
         updateAccountsList();
+        updateContentHeader();
         alert('分类删除成功');
     } catch (error) {
         console.error('删除分类失败:', error);
@@ -1780,13 +1878,36 @@ function updateCategoriesList() {
     const container = document.getElementById('categoriesList');
     container.innerHTML = '';
     
+    // 添加"全部"选项
+    const allItem = document.createElement('div');
+    allItem.className = 'category-item category-filter active';
+    allItem.setAttribute('data-category-id', 'all');
+    allItem.innerHTML = \`
+        <span class="category-name">📁 全部账户</span>
+        <span class="category-count">(\${accounts.length})</span>
+    \`;
+    allItem.onclick = () => filterAccountsByCategory('all');
+    container.appendChild(allItem);
+    
     categories.forEach(category => {
+        const categoryAccounts = accounts.filter(acc => acc.categoryId === category.id);
         const item = document.createElement('div');
-        item.className = 'category-item';
+        item.className = 'category-item category-filter';
+        item.setAttribute('data-category-id', category.id);
         item.innerHTML = \`
             <span class="category-name">\${category.name}</span>
-            <button class="delete-btn" onclick="deleteCategory('\${category.id}')" title="删除"></button>
+            <div class="category-actions">
+                <span class="category-count">(\${categoryAccounts.length})</span>
+                <button class="delete-btn" onclick="deleteCategory('\${category.id}')" title="删除"></button>
+            </div>
         \`;
+        item.onclick = (e) => {
+            // 如果点击的是删除按钮，不触发筛选
+            if (e.target.classList.contains('delete-btn')) {
+                return;
+            }
+            filterAccountsByCategory(category.id);
+        };
         container.appendChild(item);
     });
 }
@@ -1847,6 +1968,7 @@ async function addAccount() {
         });
         
         accounts.push(newAccount);
+        updateCategoriesList();
         updateAccountsList();
         hideAddAccountForm();
         alert('账户添加成功');
@@ -1868,7 +1990,25 @@ function updateAccountsList() {
     const container = document.getElementById('accountsList');
     container.innerHTML = '';
     
-    accounts.forEach(account => {
+    // 根据当前筛选条件过滤账户
+    let filteredAccounts = accounts;
+    if (currentCategoryFilter !== 'all') {
+        filteredAccounts = accounts.filter(account => account.categoryId === currentCategoryFilter);
+    }
+    
+    if (filteredAccounts.length === 0) {
+        container.innerHTML = \`
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <h3>暂无账户</h3>
+                <p>\${currentCategoryFilter === 'all' ? '还没有添加任何账户' : '该分类下暂无账户'}</p>
+                <button onclick="showAddAccountForm()" class="add-account-btn">+ 添加账户</button>
+            </div>
+        \`;
+        return;
+    }
+    
+    filteredAccounts.forEach(account => {
         const category = categories.find(cat => cat.id === account.categoryId);
         const item = document.createElement('div');
         item.className = 'account-card';
@@ -1917,6 +2057,7 @@ async function deleteAccount(id) {
         });
         
         accounts = accounts.filter(acc => acc.id !== id);
+        updateCategoriesList();
         updateAccountsList();
         alert('账户删除成功');
     } catch (error) {
@@ -1972,6 +2113,7 @@ async function saveEditedAccount() {
             accounts[index] = updatedAccount;
         }
         
+        updateCategoriesList();
         updateAccountsList();
         document.getElementById('editModal').style.display = 'none';
         editingAccountId = null;

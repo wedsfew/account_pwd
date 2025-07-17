@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// .wrangler/tmp/bundle-NGy0Q6/checked-fetch.js
+// .wrangler/tmp/bundle-WqPOh3/checked-fetch.js
 var urls = /* @__PURE__ */ new Set();
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
@@ -27,7 +27,7 @@ globalThis.fetch = new Proxy(globalThis.fetch, {
   }
 });
 
-// .wrangler/tmp/bundle-NGy0Q6/strip-cf-connecting-ip-header.js
+// .wrangler/tmp/bundle-WqPOh3/strip-cf-connecting-ip-header.js
 function stripCfConnectingIPHeader(input, init) {
   const request = new Request(input, init);
   request.headers.delete("CF-Connecting-IP");
@@ -1378,6 +1378,56 @@ body {
     transform: translateX(5px);
 }
 
+.category-filter {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.category-filter.active {
+    background: rgba(255,255,255,0.25);
+    border-left: 4px solid #fff;
+    transform: translateX(5px);
+}
+
+.category-filter:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.category-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.category-count {
+    font-size: 12px;
+    color: rgba(255,255,255,0.8);
+    font-weight: 500;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #718096;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    color: #4a5568;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+}
+
+.empty-state p {
+    margin-bottom: 25px;
+    font-size: 14px;
+}
+
 .category-name {
     font-weight: 600;
     color: white;
@@ -1829,6 +1879,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // \u66F4\u65B0\u7528\u6237\u663E\u793A
     updateUserDisplay();
     
+    // \u521D\u59CB\u5316\u7B5B\u9009\u72B6\u6001
+    setTimeout(() => {
+        updateContentHeader();
+    }, 100);
+    
     // \u6A21\u6001\u6846\u4E8B\u4EF6
     const editModal = document.getElementById('editModal');
     const changePasswordModal = document.getElementById('changePasswordModal');
@@ -1916,6 +1971,43 @@ async function updateUserDisplay() {
         const userDisplay = document.getElementById('userDisplay');
         if (userDisplay) {
             userDisplay.textContent = \`\u6B22\u8FCE\uFF0C\${username}\`;
+        }
+    }
+}
+
+// \u5168\u5C40\u53D8\u91CF\uFF1A\u5F53\u524D\u9009\u4E2D\u7684\u5206\u7C7B
+let currentCategoryFilter = 'all';
+
+// \u7B5B\u9009\u8D26\u6237\u51FD\u6570
+function filterAccountsByCategory(categoryId) {
+    currentCategoryFilter = categoryId;
+    
+    // \u66F4\u65B0\u5206\u7C7B\u9879\u7684\u6FC0\u6D3B\u72B6\u6001
+    document.querySelectorAll('.category-filter').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    const activeItem = document.querySelector(\`[data-category-id="\${categoryId}"]\`);
+    if (activeItem) {
+        activeItem.classList.add('active');
+    }
+    
+    // \u66F4\u65B0\u8D26\u6237\u5217\u8868
+    updateAccountsList();
+    
+    // \u66F4\u65B0\u5185\u5BB9\u6807\u9898
+    updateContentHeader();
+}
+
+// \u66F4\u65B0\u5185\u5BB9\u6807\u9898
+function updateContentHeader() {
+    const header = document.querySelector('.content-header h2');
+    if (currentCategoryFilter === 'all') {
+        header.textContent = '\u{1F464} \u8D26\u6237\u7BA1\u7406';
+    } else {
+        const category = categories.find(cat => cat.id === currentCategoryFilter);
+        if (category) {
+            header.textContent = \`\u{1F464} \${category.name} \u8D26\u6237\`;
         }
     }
 }
@@ -2092,9 +2184,15 @@ async function deleteCategory(id) {
         accounts = accounts.filter(acc => acc.categoryId !== id);
         categories = categories.filter(cat => cat.id !== id);
         
+        // \u5982\u679C\u5220\u9664\u7684\u662F\u5F53\u524D\u9009\u4E2D\u7684\u5206\u7C7B\uFF0C\u91CD\u7F6E\u4E3A\u5168\u90E8
+        if (currentCategoryFilter === id) {
+            currentCategoryFilter = 'all';
+        }
+        
         updateCategoriesList();
         updateCategorySelects();
         updateAccountsList();
+        updateContentHeader();
         alert('\u5206\u7C7B\u5220\u9664\u6210\u529F');
     } catch (error) {
         console.error('\u5220\u9664\u5206\u7C7B\u5931\u8D25:', error);
@@ -2105,13 +2203,36 @@ function updateCategoriesList() {
     const container = document.getElementById('categoriesList');
     container.innerHTML = '';
     
+    // \u6DFB\u52A0"\u5168\u90E8"\u9009\u9879
+    const allItem = document.createElement('div');
+    allItem.className = 'category-item category-filter active';
+    allItem.setAttribute('data-category-id', 'all');
+    allItem.innerHTML = \`
+        <span class="category-name">\u{1F4C1} \u5168\u90E8\u8D26\u6237</span>
+        <span class="category-count">(\${accounts.length})</span>
+    \`;
+    allItem.onclick = () => filterAccountsByCategory('all');
+    container.appendChild(allItem);
+    
     categories.forEach(category => {
+        const categoryAccounts = accounts.filter(acc => acc.categoryId === category.id);
         const item = document.createElement('div');
-        item.className = 'category-item';
+        item.className = 'category-item category-filter';
+        item.setAttribute('data-category-id', category.id);
         item.innerHTML = \`
             <span class="category-name">\${category.name}</span>
-            <button class="delete-btn" onclick="deleteCategory('\${category.id}')" title="\u5220\u9664"></button>
+            <div class="category-actions">
+                <span class="category-count">(\${categoryAccounts.length})</span>
+                <button class="delete-btn" onclick="deleteCategory('\${category.id}')" title="\u5220\u9664"></button>
+            </div>
         \`;
+        item.onclick = (e) => {
+            // \u5982\u679C\u70B9\u51FB\u7684\u662F\u5220\u9664\u6309\u94AE\uFF0C\u4E0D\u89E6\u53D1\u7B5B\u9009
+            if (e.target.classList.contains('delete-btn')) {
+                return;
+            }
+            filterAccountsByCategory(category.id);
+        };
         container.appendChild(item);
     });
 }
@@ -2172,6 +2293,7 @@ async function addAccount() {
         });
         
         accounts.push(newAccount);
+        updateCategoriesList();
         updateAccountsList();
         hideAddAccountForm();
         alert('\u8D26\u6237\u6DFB\u52A0\u6210\u529F');
@@ -2193,7 +2315,25 @@ function updateAccountsList() {
     const container = document.getElementById('accountsList');
     container.innerHTML = '';
     
-    accounts.forEach(account => {
+    // \u6839\u636E\u5F53\u524D\u7B5B\u9009\u6761\u4EF6\u8FC7\u6EE4\u8D26\u6237
+    let filteredAccounts = accounts;
+    if (currentCategoryFilter !== 'all') {
+        filteredAccounts = accounts.filter(account => account.categoryId === currentCategoryFilter);
+    }
+    
+    if (filteredAccounts.length === 0) {
+        container.innerHTML = \`
+            <div class="empty-state">
+                <div class="empty-icon">\u{1F4ED}</div>
+                <h3>\u6682\u65E0\u8D26\u6237</h3>
+                <p>\${currentCategoryFilter === 'all' ? '\u8FD8\u6CA1\u6709\u6DFB\u52A0\u4EFB\u4F55\u8D26\u6237' : '\u8BE5\u5206\u7C7B\u4E0B\u6682\u65E0\u8D26\u6237'}</p>
+                <button onclick="showAddAccountForm()" class="add-account-btn">+ \u6DFB\u52A0\u8D26\u6237</button>
+            </div>
+        \`;
+        return;
+    }
+    
+    filteredAccounts.forEach(account => {
         const category = categories.find(cat => cat.id === account.categoryId);
         const item = document.createElement('div');
         item.className = 'account-card';
@@ -2242,6 +2382,7 @@ async function deleteAccount(id) {
         });
         
         accounts = accounts.filter(acc => acc.id !== id);
+        updateCategoriesList();
         updateAccountsList();
         alert('\u8D26\u6237\u5220\u9664\u6210\u529F');
     } catch (error) {
@@ -2297,6 +2438,7 @@ async function saveEditedAccount() {
             accounts[index] = updatedAccount;
         }
         
+        updateCategoriesList();
         updateAccountsList();
         document.getElementById('editModal').style.display = 'none';
         editingAccountId = null;
@@ -2349,7 +2491,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-NGy0Q6/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-WqPOh3/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -2381,7 +2523,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-NGy0Q6/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-WqPOh3/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
