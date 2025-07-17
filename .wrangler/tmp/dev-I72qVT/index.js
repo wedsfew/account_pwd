@@ -235,6 +235,17 @@ async function serveStaticFiles(request, corsHeaders) {
     });
   }
   if (path === "/" || path === "/index.html") {
+    const cookies = request.headers.get("cookie") || "";
+    const isLoggedIn = cookies.includes("isLoggedIn=true");
+    if (!isLoggedIn) {
+      return new Response("", {
+        status: 302,
+        headers: {
+          ...corsHeaders,
+          "Location": "/login"
+        }
+      });
+    }
     return new Response(getHTMLContent(), {
       headers: {
         ...corsHeaders,
@@ -258,10 +269,11 @@ async function serveStaticFiles(request, corsHeaders) {
       }
     });
   }
-  return new Response(getHTMLContent(), {
+  return new Response("", {
+    status: 302,
     headers: {
       ...corsHeaders,
-      "Content-Type": "text/html"
+      "Location": "/login"
     }
   });
 }
@@ -483,10 +495,16 @@ function getLoginContent() {
                     // \u767B\u5F55\u6210\u529F
                     showSuccess('\u767B\u5F55\u6210\u529F\uFF0C\u6B63\u5728\u8DF3\u8F6C...');
                     
-                    // \u5B58\u50A8\u767B\u5F55\u72B6\u6001
+                    // \u5B58\u50A8\u767B\u5F55\u72B6\u6001\u5230localStorage\u548Ccookie
                     localStorage.setItem('isLoggedIn', 'true');
                     localStorage.setItem('username', username);
                     localStorage.setItem('loginTime', Date.now().toString());
+                    
+                    // \u8BBE\u7F6Ecookie\uFF0824\u5C0F\u65F6\u8FC7\u671F\uFF09
+                    const expires = new Date();
+                    expires.setTime(expires.getTime() + (24 * 60 * 60 * 1000));
+                    document.cookie = \`isLoggedIn=true; expires=\${expires.toUTCString()}; path=/\`;
+                    document.cookie = \`username=\${username}; expires=\${expires.toUTCString()}; path=/\`;
                     
                     // \u5EF6\u8FDF\u8DF3\u8F6C\u5230\u4E3B\u9875\u9762
                     setTimeout(() => {
@@ -527,13 +545,22 @@ function getLoginContent() {
                 const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
                 
                 if (hoursSinceLogin < 24) {
-                    // \u767B\u5F55\u672A\u8FC7\u671F\uFF0C\u76F4\u63A5\u8DF3\u8F6C\u5230\u4E3B\u9875\u9762
+                    // \u767B\u5F55\u672A\u8FC7\u671F\uFF0C\u8BBE\u7F6Ecookie\u5E76\u8DF3\u8F6C\u5230\u4E3B\u9875\u9762
+                    const expires = new Date();
+                    expires.setTime(expires.getTime() + (24 * 60 * 60 * 1000));
+                    document.cookie = \`isLoggedIn=true; expires=\${expires.toUTCString()}; path=/\`;
+                    document.cookie = \`username=\${localStorage.getItem('username') || 'admin'}; expires=\${expires.toUTCString()}; path=/\`;
+                    
                     window.location.href = '/';
                 } else {
                     // \u767B\u5F55\u5DF2\u8FC7\u671F\uFF0C\u6E05\u9664\u767B\u5F55\u72B6\u6001
                     localStorage.removeItem('isLoggedIn');
                     localStorage.removeItem('username');
                     localStorage.removeItem('loginTime');
+                    
+                    // \u6E05\u9664cookie
+                    document.cookie = 'isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
                 }
             }
         });
@@ -978,6 +1005,11 @@ function logout() {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('username');
     localStorage.removeItem('loginTime');
+    
+    // \u6E05\u9664cookie
+    document.cookie = 'isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    
     window.location.href = '/login';
 }
 

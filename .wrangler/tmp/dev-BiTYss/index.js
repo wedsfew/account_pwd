@@ -1,115 +1,290 @@
-import { APIHandler, ResponseUtil } from './utils.js';
+var __defProp = Object.defineProperty;
+var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-export default {
-  async fetch(request, env, ctx) {
-    const url = new URL(request.url);
-    const path = url.pathname;
-
-    // 设置CORS头
-    const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    };
-
-    // 处理预检请求
-    if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: corsHeaders });
+// .wrangler/tmp/bundle-ELSNCk/checked-fetch.js
+var urls = /* @__PURE__ */ new Set();
+function checkURL(request, init) {
+  const url = request instanceof URL ? request : new URL(
+    (typeof request === "string" ? new Request(request, init) : request).url
+  );
+  if (url.port && url.port !== "443" && url.protocol === "https:") {
+    if (!urls.has(url.toString())) {
+      urls.add(url.toString());
+      console.warn(
+        `WARNING: known issue with \`fetch()\` requests to custom HTTPS ports in published Workers:
+ - ${url.toString()} - the custom port will be ignored when the Worker is published using the \`wrangler deploy\` command.
+`
+      );
     }
+  }
+}
+__name(checkURL, "checkURL");
+globalThis.fetch = new Proxy(globalThis.fetch, {
+  apply(target, thisArg, argArray) {
+    const [request, init] = argArray;
+    checkURL(request, init);
+    return Reflect.apply(target, thisArg, argArray);
+  }
+});
 
+// .wrangler/tmp/bundle-ELSNCk/strip-cf-connecting-ip-header.js
+function stripCfConnectingIPHeader(input, init) {
+  const request = new Request(input, init);
+  request.headers.delete("CF-Connecting-IP");
+  return request;
+}
+__name(stripCfConnectingIPHeader, "stripCfConnectingIPHeader");
+globalThis.fetch = new Proxy(globalThis.fetch, {
+  apply(target, thisArg, argArray) {
+    return Reflect.apply(target, thisArg, [
+      stripCfConnectingIPHeader.apply(null, argArray)
+    ]);
+  }
+});
+
+// src/utils.js
+var ResponseUtil = class {
+  static success(data, corsHeaders) {
+    return new Response(JSON.stringify(data), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
+  }
+  static error(message, status = 500, corsHeaders) {
+    return new Response(JSON.stringify({ error: message }), {
+      status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
+  }
+  static created(data, corsHeaders) {
+    return new Response(JSON.stringify(data), {
+      status: 201,
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
+  }
+};
+__name(ResponseUtil, "ResponseUtil");
+var AccountManager = class {
+  static async getAll(env, corsHeaders) {
     try {
-      // API路由
-      if (path.startsWith('/api/')) {
-        return await APIHandler.handleAPI(request, env, corsHeaders);
-      }
-
-      // 静态文件服务
-      return await serveStaticFiles(request, corsHeaders);
+      const accounts = await env.ACCOUNT_DATA.get("accounts", { type: "json" }) || [];
+      return ResponseUtil.success(accounts, corsHeaders);
     } catch (error) {
-      console.error('Error:', error);
-      return ResponseUtil.error('Internal Server Error', 500, corsHeaders);
+      return ResponseUtil.error("Failed to get accounts", 500, corsHeaders);
+    }
+  }
+  static async create(request, env, corsHeaders) {
+    try {
+      const account = await request.json();
+      const accounts = await env.ACCOUNT_DATA.get("accounts", { type: "json" }) || [];
+      account.id = Date.now().toString();
+      account.createdAt = (/* @__PURE__ */ new Date()).toISOString();
+      accounts.push(account);
+      await env.ACCOUNT_DATA.put("accounts", JSON.stringify(accounts));
+      return ResponseUtil.created(account, corsHeaders);
+    } catch (error) {
+      return ResponseUtil.error("Failed to create account", 500, corsHeaders);
+    }
+  }
+  static async update(request, env, corsHeaders) {
+    try {
+      const updatedAccount = await request.json();
+      const accounts = await env.ACCOUNT_DATA.get("accounts", { type: "json" }) || [];
+      const index = accounts.findIndex((acc) => acc.id === updatedAccount.id);
+      if (index === -1) {
+        return ResponseUtil.error("Account not found", 404, corsHeaders);
+      }
+      updatedAccount.updatedAt = (/* @__PURE__ */ new Date()).toISOString();
+      accounts[index] = updatedAccount;
+      await env.ACCOUNT_DATA.put("accounts", JSON.stringify(accounts));
+      return ResponseUtil.success(updatedAccount, corsHeaders);
+    } catch (error) {
+      return ResponseUtil.error("Failed to update account", 500, corsHeaders);
+    }
+  }
+  static async delete(request, env, corsHeaders) {
+    try {
+      const url = new URL(request.url);
+      const id = url.searchParams.get("id");
+      if (!id) {
+        return ResponseUtil.error("Account ID required", 400, corsHeaders);
+      }
+      const accounts = await env.ACCOUNT_DATA.get("accounts", { type: "json" }) || [];
+      const filteredAccounts = accounts.filter((acc) => acc.id !== id);
+      await env.ACCOUNT_DATA.put("accounts", JSON.stringify(filteredAccounts));
+      return ResponseUtil.success({ success: true }, corsHeaders);
+    } catch (error) {
+      return ResponseUtil.error("Failed to delete account", 500, corsHeaders);
     }
   }
 };
+__name(AccountManager, "AccountManager");
+var CategoryManager = class {
+  static async getAll(env, corsHeaders) {
+    try {
+      const categories = await env.ACCOUNT_DATA.get("categories", { type: "json" }) || [];
+      return ResponseUtil.success(categories, corsHeaders);
+    } catch (error) {
+      return ResponseUtil.error("Failed to get categories", 500, corsHeaders);
+    }
+  }
+  static async create(request, env, corsHeaders) {
+    try {
+      const category = await request.json();
+      const categories = await env.ACCOUNT_DATA.get("categories", { type: "json" }) || [];
+      category.id = Date.now().toString();
+      category.createdAt = (/* @__PURE__ */ new Date()).toISOString();
+      categories.push(category);
+      await env.ACCOUNT_DATA.put("categories", JSON.stringify(categories));
+      return ResponseUtil.created(category, corsHeaders);
+    } catch (error) {
+      return ResponseUtil.error("Failed to create category", 500, corsHeaders);
+    }
+  }
+  static async delete(request, env, corsHeaders) {
+    try {
+      const url = new URL(request.url);
+      const id = url.searchParams.get("id");
+      if (!id) {
+        return ResponseUtil.error("Category ID required", 400, corsHeaders);
+      }
+      const categories = await env.ACCOUNT_DATA.get("categories", { type: "json" }) || [];
+      const filteredCategories = categories.filter((cat) => cat.id !== id);
+      await env.ACCOUNT_DATA.put("categories", JSON.stringify(filteredCategories));
+      return ResponseUtil.success({ success: true }, corsHeaders);
+    } catch (error) {
+      return ResponseUtil.error("Failed to delete category", 500, corsHeaders);
+    }
+  }
+};
+__name(CategoryManager, "CategoryManager");
+var APIHandler = class {
+  static async handleAccounts(request, env, corsHeaders) {
+    const { method } = request;
+    switch (method) {
+      case "GET":
+        return await AccountManager.getAll(env, corsHeaders);
+      case "POST":
+        return await AccountManager.create(request, env, corsHeaders);
+      case "PUT":
+        return await AccountManager.update(request, env, corsHeaders);
+      case "DELETE":
+        return await AccountManager.delete(request, env, corsHeaders);
+      default:
+        return ResponseUtil.error("Method not allowed", 405, corsHeaders);
+    }
+  }
+  static async handleCategories(request, env, corsHeaders) {
+    const { method } = request;
+    switch (method) {
+      case "GET":
+        return await CategoryManager.getAll(env, corsHeaders);
+      case "POST":
+        return await CategoryManager.create(request, env, corsHeaders);
+      case "DELETE":
+        return await CategoryManager.delete(request, env, corsHeaders);
+      default:
+        return ResponseUtil.error("Method not allowed", 405, corsHeaders);
+    }
+  }
+  static async handleAPI(request, env, corsHeaders) {
+    const url = new URL(request.url);
+    const path = url.pathname;
+    if (path === "/api/accounts") {
+      return await this.handleAccounts(request, env, corsHeaders);
+    } else if (path === "/api/categories") {
+      return await this.handleCategories(request, env, corsHeaders);
+    }
+    return ResponseUtil.error("Not Found", 404, corsHeaders);
+  }
+};
+__name(APIHandler, "APIHandler");
 
-// 静态文件服务
+// src/index.js
+var src_default = {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    const path = url.pathname;
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type"
+    };
+    if (request.method === "OPTIONS") {
+      return new Response(null, { headers: corsHeaders });
+    }
+    try {
+      if (path.startsWith("/api/")) {
+        return await APIHandler.handleAPI(request, env, corsHeaders);
+      }
+      return await serveStaticFiles(request, corsHeaders);
+    } catch (error) {
+      console.error("Error:", error);
+      return ResponseUtil.error("Internal Server Error", 500, corsHeaders);
+    }
+  }
+};
 async function serveStaticFiles(request, corsHeaders) {
   const url = new URL(request.url);
   const path = url.pathname;
-  
-  // 登录页面
-  if (path === '/login') {
+  if (path === "/login") {
     return new Response(getLoginContent(), {
-      headers: { 
-        ...corsHeaders, 
-        'Content-Type': 'text/html' 
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "text/html"
       }
     });
   }
-  
-  // 主页面 - 需要登录验证
-  if (path === '/' || path === '/index.html') {
-    // 检查登录状态
-    const cookies = request.headers.get('cookie') || '';
-    const isLoggedIn = cookies.includes('isLoggedIn=true');
-    
+  if (path === "/" || path === "/index.html") {
+    const cookies = request.headers.get("cookie") || "";
+    const isLoggedIn = cookies.includes("isLoggedIn=true");
     if (!isLoggedIn) {
-      // 未登录，重定向到登录页面
-      return new Response('', {
+      return new Response("", {
         status: 302,
         headers: {
           ...corsHeaders,
-          'Location': '/login'
+          "Location": "/login"
         }
       });
     }
-    
-    // 已登录，返回主页面
     return new Response(getHTMLContent(), {
-      headers: { 
-        ...corsHeaders, 
-        'Content-Type': 'text/html' 
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "text/html"
       }
     });
   }
-  
-  // 返回CSS内容
-  if (path === '/styles.css') {
+  if (path === "/styles.css") {
     return new Response(getCSSContent(), {
-      headers: { 
-        ...corsHeaders, 
-        'Content-Type': 'text/css' 
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "text/css"
       }
     });
   }
-  
-  // 返回JS内容
-  if (path === '/script.js') {
+  if (path === "/script.js") {
     return new Response(getJSContent(), {
-      headers: { 
-        ...corsHeaders, 
-        'Content-Type': 'application/javascript' 
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/javascript"
       }
     });
   }
-  
-  // 默认重定向到登录页面
-  return new Response('', {
+  return new Response("", {
     status: 302,
     headers: {
       ...corsHeaders,
-      'Location': '/login'
+      "Location": "/login"
     }
   });
 }
-
+__name(serveStaticFiles, "serveStaticFiles");
 function getLoginContent() {
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登录 - 账户密码管理工具</title>
+    <title>\u767B\u5F55 - \u8D26\u6237\u5BC6\u7801\u7BA1\u7406\u5DE5\u5177</title>
     <style>
         * {
             margin: 0;
@@ -248,7 +423,7 @@ function getLoginContent() {
         }
 
         .demo-info li:before {
-            content: "•";
+            content: "\u2022";
             color: #667eea;
             position: absolute;
             left: 0;
@@ -258,23 +433,23 @@ function getLoginContent() {
 <body>
     <div class="login-container">
         <div class="login-header">
-            <h1>🔐 账户密码管理工具</h1>
-            <p>请登录以访问您的账户数据</p>
+            <h1>\u{1F510} \u8D26\u6237\u5BC6\u7801\u7BA1\u7406\u5DE5\u5177</h1>
+            <p>\u8BF7\u767B\u5F55\u4EE5\u8BBF\u95EE\u60A8\u7684\u8D26\u6237\u6570\u636E</p>
         </div>
         
         <form class="login-form" id="loginForm">
             <div class="form-group">
-                <label for="username">用户名</label>
-                <input type="text" id="username" name="username" required placeholder="请输入用户名">
+                <label for="username">\u7528\u6237\u540D</label>
+                <input type="text" id="username" name="username" required placeholder="\u8BF7\u8F93\u5165\u7528\u6237\u540D">
             </div>
             
             <div class="form-group">
-                <label for="password">密码</label>
-                <input type="password" id="password" name="password" required placeholder="请输入密码">
+                <label for="password">\u5BC6\u7801</label>
+                <input type="password" id="password" name="password" required placeholder="\u8BF7\u8F93\u5165\u5BC6\u7801">
             </div>
             
             <button type="submit" class="login-btn" id="loginBtn">
-                登录
+                \u767B\u5F55
             </button>
             
             <div class="error-message" id="errorMessage"></div>
@@ -282,10 +457,10 @@ function getLoginContent() {
         </form>
         
         <div class="demo-info">
-            <h3>演示账户</h3>
+            <h3>\u6F14\u793A\u8D26\u6237</h3>
             <ul>
-                <li>用户名: admin</li>
-                <li>密码: 123456</li>
+                <li>\u7528\u6237\u540D: admin</li>
+                <li>\u5BC6\u7801: 123456</li>
             </ul>
         </div>
     </div>
@@ -300,51 +475,51 @@ function getLoginContent() {
             const errorMessage = document.getElementById('errorMessage');
             const successMessage = document.getElementById('successMessage');
             
-            // 隐藏之前的消息
+            // \u9690\u85CF\u4E4B\u524D\u7684\u6D88\u606F
             errorMessage.style.display = 'none';
             successMessage.style.display = 'none';
             
-            // 验证输入
+            // \u9A8C\u8BC1\u8F93\u5165
             if (!username || !password) {
-                showError('请填写用户名和密码');
+                showError('\u8BF7\u586B\u5199\u7528\u6237\u540D\u548C\u5BC6\u7801');
                 return;
             }
             
-            // 禁用登录按钮
+            // \u7981\u7528\u767B\u5F55\u6309\u94AE
             loginBtn.disabled = true;
-            loginBtn.textContent = '登录中...';
+            loginBtn.textContent = '\u767B\u5F55\u4E2D...';
             
             try {
-                // 验证用户凭据
+                // \u9A8C\u8BC1\u7528\u6237\u51ED\u636E
                 if (username === 'admin' && password === '123456') {
-                    // 登录成功
-                    showSuccess('登录成功，正在跳转...');
+                    // \u767B\u5F55\u6210\u529F
+                    showSuccess('\u767B\u5F55\u6210\u529F\uFF0C\u6B63\u5728\u8DF3\u8F6C...');
                     
-                    // 存储登录状态到localStorage和cookie
+                    // \u5B58\u50A8\u767B\u5F55\u72B6\u6001\u5230localStorage\u548Ccookie
                     localStorage.setItem('isLoggedIn', 'true');
                     localStorage.setItem('username', username);
                     localStorage.setItem('loginTime', Date.now().toString());
                     
-                    // 设置cookie（24小时过期）
+                    // \u8BBE\u7F6Ecookie\uFF0824\u5C0F\u65F6\u8FC7\u671F\uFF09
                     const expires = new Date();
                     expires.setTime(expires.getTime() + (24 * 60 * 60 * 1000));
                     document.cookie = \`isLoggedIn=true; expires=\${expires.toUTCString()}; path=/\`;
                     document.cookie = \`username=\${username}; expires=\${expires.toUTCString()}; path=/\`;
                     
-                    // 延迟跳转到主页面
+                    // \u5EF6\u8FDF\u8DF3\u8F6C\u5230\u4E3B\u9875\u9762
                     setTimeout(() => {
                         window.location.href = '/';
                     }, 1000);
                 } else {
-                    showError('用户名或密码错误');
+                    showError('\u7528\u6237\u540D\u6216\u5BC6\u7801\u9519\u8BEF');
                 }
             } catch (error) {
-                showError('登录失败，请重试');
-                console.error('登录错误:', error);
+                showError('\u767B\u5F55\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5');
+                console.error('\u767B\u5F55\u9519\u8BEF:', error);
             } finally {
-                // 恢复登录按钮
+                // \u6062\u590D\u767B\u5F55\u6309\u94AE
                 loginBtn.disabled = false;
-                loginBtn.textContent = '登录';
+                loginBtn.textContent = '\u767B\u5F55';
             }
         });
         
@@ -360,17 +535,17 @@ function getLoginContent() {
             successMessage.style.display = 'block';
         }
         
-        // 检查是否已经登录
+        // \u68C0\u67E5\u662F\u5426\u5DF2\u7ECF\u767B\u5F55
         window.addEventListener('load', function() {
             const isLoggedIn = localStorage.getItem('isLoggedIn');
             if (isLoggedIn === 'true') {
-                // 检查登录是否过期（24小时）
+                // \u68C0\u67E5\u767B\u5F55\u662F\u5426\u8FC7\u671F\uFF0824\u5C0F\u65F6\uFF09
                 const loginTime = parseInt(localStorage.getItem('loginTime') || '0');
                 const now = Date.now();
                 const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
                 
                 if (hoursSinceLogin < 24) {
-                    // 登录未过期，设置cookie并跳转到主页面
+                    // \u767B\u5F55\u672A\u8FC7\u671F\uFF0C\u8BBE\u7F6Ecookie\u5E76\u8DF3\u8F6C\u5230\u4E3B\u9875\u9762
                     const expires = new Date();
                     expires.setTime(expires.getTime() + (24 * 60 * 60 * 1000));
                     document.cookie = \`isLoggedIn=true; expires=\${expires.toUTCString()}; path=/\`;
@@ -378,97 +553,97 @@ function getLoginContent() {
                     
                     window.location.href = '/';
                 } else {
-                    // 登录已过期，清除登录状态
+                    // \u767B\u5F55\u5DF2\u8FC7\u671F\uFF0C\u6E05\u9664\u767B\u5F55\u72B6\u6001
                     localStorage.removeItem('isLoggedIn');
                     localStorage.removeItem('username');
                     localStorage.removeItem('loginTime');
                     
-                    // 清除cookie
+                    // \u6E05\u9664cookie
                     document.cookie = 'isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
                     document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
                 }
             }
         });
-    </script>
+    <\/script>
 </body>
 </html>`;
 }
-
+__name(getLoginContent, "getLoginContent");
 function getHTMLContent() {
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>账户密码管理工具</title>
+    <title>\u8D26\u6237\u5BC6\u7801\u7BA1\u7406\u5DE5\u5177</title>
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
     <div class="container">
         <header>
             <div class="header-content">
-                <h1>🔐 账户密码管理工具</h1>
+                <h1>\u{1F510} \u8D26\u6237\u5BC6\u7801\u7BA1\u7406\u5DE5\u5177</h1>
                 <div class="user-info">
-                    <span id="userDisplay">欢迎，admin</span>
-                    <button onclick="logout()" class="logout-btn">登出</button>
+                    <span id="userDisplay">\u6B22\u8FCE\uFF0Cadmin</span>
+                    <button onclick="logout()" class="logout-btn">\u767B\u51FA</button>
                 </div>
             </div>
         </header>
         
         <div class="main-content">
-            <!-- 分类管理 -->
+            <!-- \u5206\u7C7B\u7BA1\u7406 -->
             <div class="section">
-                <h2>📁 分类管理</h2>
+                <h2>\u{1F4C1} \u5206\u7C7B\u7BA1\u7406</h2>
                 <div class="category-form">
-                    <input type="text" id="categoryName" placeholder="输入分类名称" maxlength="20">
-                    <button onclick="addCategory()">添加分类</button>
+                    <input type="text" id="categoryName" placeholder="\u8F93\u5165\u5206\u7C7B\u540D\u79F0" maxlength="20">
+                    <button onclick="addCategory()">\u6DFB\u52A0\u5206\u7C7B</button>
                 </div>
                 <div id="categoriesList" class="categories-list"></div>
             </div>
             
-            <!-- 账户管理 -->
+            <!-- \u8D26\u6237\u7BA1\u7406 -->
             <div class="section">
-                <h2>👤 账户管理</h2>
+                <h2>\u{1F464} \u8D26\u6237\u7BA1\u7406</h2>
                 <div class="account-form">
                     <select id="accountCategory" required>
-                        <option value="">选择分类</option>
+                        <option value="">\u9009\u62E9\u5206\u7C7B</option>
                     </select>
-                    <input type="text" id="accountName" placeholder="账户名称" required maxlength="50">
-                    <input type="text" id="accountUsername" placeholder="用户名" required maxlength="100">
-                    <input type="password" id="accountPassword" placeholder="密码" required maxlength="100">
-                    <input type="text" id="accountUrl" placeholder="网址 (可选)" maxlength="200">
-                    <textarea id="accountNotes" placeholder="备注 (可选)" maxlength="500"></textarea>
-                    <button onclick="addAccount()">添加账户</button>
+                    <input type="text" id="accountName" placeholder="\u8D26\u6237\u540D\u79F0" required maxlength="50">
+                    <input type="text" id="accountUsername" placeholder="\u7528\u6237\u540D" required maxlength="100">
+                    <input type="password" id="accountPassword" placeholder="\u5BC6\u7801" required maxlength="100">
+                    <input type="text" id="accountUrl" placeholder="\u7F51\u5740 (\u53EF\u9009)" maxlength="200">
+                    <textarea id="accountNotes" placeholder="\u5907\u6CE8 (\u53EF\u9009)" maxlength="500"></textarea>
+                    <button onclick="addAccount()">\u6DFB\u52A0\u8D26\u6237</button>
                 </div>
                 <div id="accountsList" class="accounts-list"></div>
             </div>
         </div>
     </div>
     
-    <!-- 编辑模态框 -->
+    <!-- \u7F16\u8F91\u6A21\u6001\u6846 -->
     <div id="editModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h3>编辑账户</h3>
+            <h3>\u7F16\u8F91\u8D26\u6237</h3>
             <form id="editForm">
                 <select id="editCategory" required>
-                    <option value="">选择分类</option>
+                    <option value="">\u9009\u62E9\u5206\u7C7B</option>
                 </select>
-                <input type="text" id="editName" placeholder="账户名称" required maxlength="50">
-                <input type="text" id="editUsername" placeholder="用户名" required maxlength="100">
-                <input type="password" id="editPassword" placeholder="密码" required maxlength="100">
-                <input type="text" id="editUrl" placeholder="网址 (可选)" maxlength="200">
-                <textarea id="editNotes" placeholder="备注 (可选)" maxlength="500"></textarea>
-                <button type="submit">保存</button>
+                <input type="text" id="editName" placeholder="\u8D26\u6237\u540D\u79F0" required maxlength="50">
+                <input type="text" id="editUsername" placeholder="\u7528\u6237\u540D" required maxlength="100">
+                <input type="password" id="editPassword" placeholder="\u5BC6\u7801" required maxlength="100">
+                <input type="text" id="editUrl" placeholder="\u7F51\u5740 (\u53EF\u9009)" maxlength="200">
+                <textarea id="editNotes" placeholder="\u5907\u6CE8 (\u53EF\u9009)" maxlength="500"></textarea>
+                <button type="submit">\u4FDD\u5B58</button>
             </form>
         </div>
     </div>
     
-    <script src="/script.js"></script>
+    <script src="/script.js"><\/script>
 </body>
 </html>`;
 }
-
+__name(getHTMLContent, "getHTMLContent");
 function getCSSContent() {
   return `* {
     margin: 0;
@@ -559,7 +734,7 @@ header h1 {
     font-size: 1.5rem;
 }
 
-/* 表单样式 */
+/* \u8868\u5355\u6837\u5F0F */
 .category-form, .account-form {
     margin-bottom: 25px;
 }
@@ -595,7 +770,7 @@ button:hover {
     transform: translateY(-2px);
 }
 
-/* 列表样式 */
+/* \u5217\u8868\u6837\u5F0F */
 .categories-list, .accounts-list {
     max-height: 400px;
     overflow-y: auto;
@@ -667,7 +842,7 @@ button:hover {
     margin-left: 5px;
 }
 
-/* 模态框样式 */
+/* \u6A21\u6001\u6846\u6837\u5F0F */
 .modal {
     display: none;
     position: fixed;
@@ -709,7 +884,7 @@ button:hover {
     color: #4a5568;
 }
 
-/* 响应式设计 */
+/* \u54CD\u5E94\u5F0F\u8BBE\u8BA1 */
 @media (max-width: 768px) {
     .header-content {
         flex-direction: column;
@@ -733,7 +908,7 @@ button:hover {
     }
 }
 
-/* 滚动条样式 */
+/* \u6EDA\u52A8\u6761\u6837\u5F0F */
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -752,29 +927,29 @@ button:hover {
     background: #a8a8a8;
 }`;
 }
-
+__name(getCSSContent, "getCSSContent");
 function getJSContent() {
-  return `// 全局变量
+  return `// \u5168\u5C40\u53D8\u91CF
 let accounts = [];
 let categories = [];
 let editingAccountId = null;
 
-// 页面加载时初始化
+// \u9875\u9762\u52A0\u8F7D\u65F6\u521D\u59CB\u5316
 document.addEventListener('DOMContentLoaded', function() {
-    // 检查登录状态
+    // \u68C0\u67E5\u767B\u5F55\u72B6\u6001
     if (!checkLoginStatus()) {
         window.location.href = '/login';
         return;
     }
     
-    // 更新用户显示
+    // \u66F4\u65B0\u7528\u6237\u663E\u793A
     updateUserDisplay();
     
-    // 初始化功能
+    // \u521D\u59CB\u5316\u529F\u80FD
     loadCategories();
     loadAccounts();
     
-    // 模态框事件
+    // \u6A21\u6001\u6846\u4E8B\u4EF6
     const modal = document.getElementById('editModal');
     const closeBtn = document.querySelector('.close');
     
@@ -788,27 +963,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // 编辑表单提交
+    // \u7F16\u8F91\u8868\u5355\u63D0\u4EA4
     document.getElementById('editForm').addEventListener('submit', function(e) {
         e.preventDefault();
         saveEditedAccount();
     });
 });
 
-// 检查登录状态
+// \u68C0\u67E5\u767B\u5F55\u72B6\u6001
 function checkLoginStatus() {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     if (isLoggedIn !== 'true') {
         return false;
     }
     
-    // 检查登录是否过期（24小时）
+    // \u68C0\u67E5\u767B\u5F55\u662F\u5426\u8FC7\u671F\uFF0824\u5C0F\u65F6\uFF09
     const loginTime = parseInt(localStorage.getItem('loginTime') || '0');
     const now = Date.now();
     const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
     
     if (hoursSinceLogin >= 24) {
-        // 登录已过期，清除登录状态
+        // \u767B\u5F55\u5DF2\u8FC7\u671F\uFF0C\u6E05\u9664\u767B\u5F55\u72B6\u6001
         logout();
         return false;
     }
@@ -816,29 +991,29 @@ function checkLoginStatus() {
     return true;
 }
 
-// 更新用户显示
+// \u66F4\u65B0\u7528\u6237\u663E\u793A
 function updateUserDisplay() {
     const username = localStorage.getItem('username') || 'admin';
     const userDisplay = document.getElementById('userDisplay');
     if (userDisplay) {
-        userDisplay.textContent = \`欢迎，\${username}\`;
+        userDisplay.textContent = \`\u6B22\u8FCE\uFF0C\${username}\`;
     }
 }
 
-// 登出功能
+// \u767B\u51FA\u529F\u80FD
 function logout() {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('username');
     localStorage.removeItem('loginTime');
     
-    // 清除cookie
+    // \u6E05\u9664cookie
     document.cookie = 'isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     
     window.location.href = '/login';
 }
 
-// API工具函数
+// API\u5DE5\u5177\u51FD\u6570
 async function apiCall(url, options = {}) {
     try {
         const response = await fetch(url, {
@@ -855,20 +1030,20 @@ async function apiCall(url, options = {}) {
         
         return await response.json();
     } catch (error) {
-        console.error('API调用错误:', error);
-        alert('操作失败，请重试');
+        console.error('API\u8C03\u7528\u9519\u8BEF:', error);
+        alert('\u64CD\u4F5C\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5');
         throw error;
     }
 }
 
-// 分类管理
+// \u5206\u7C7B\u7BA1\u7406
 async function loadCategories() {
     try {
         categories = await apiCall('/api/categories');
         updateCategoriesList();
         updateCategorySelects();
     } catch (error) {
-        console.error('加载分类失败:', error);
+        console.error('\u52A0\u8F7D\u5206\u7C7B\u5931\u8D25:', error);
     }
 }
 
@@ -877,12 +1052,12 @@ async function addCategory() {
     const name = nameInput.value.trim();
     
     if (!name) {
-        alert('请输入分类名称');
+        alert('\u8BF7\u8F93\u5165\u5206\u7C7B\u540D\u79F0');
         return;
     }
     
     if (categories.some(cat => cat.name.toLowerCase() === name.toLowerCase())) {
-        alert('分类名称已存在');
+        alert('\u5206\u7C7B\u540D\u79F0\u5DF2\u5B58\u5728');
         return;
     }
     
@@ -896,14 +1071,14 @@ async function addCategory() {
         updateCategoriesList();
         updateCategorySelects();
         nameInput.value = '';
-        alert('分类添加成功');
+        alert('\u5206\u7C7B\u6DFB\u52A0\u6210\u529F');
     } catch (error) {
-        console.error('添加分类失败:', error);
+        console.error('\u6DFB\u52A0\u5206\u7C7B\u5931\u8D25:', error);
     }
 }
 
 async function deleteCategory(id) {
-    if (!confirm('确定要删除这个分类吗？相关的账户也会被删除。')) {
+    if (!confirm('\u786E\u5B9A\u8981\u5220\u9664\u8FD9\u4E2A\u5206\u7C7B\u5417\uFF1F\u76F8\u5173\u7684\u8D26\u6237\u4E5F\u4F1A\u88AB\u5220\u9664\u3002')) {
         return;
     }
     
@@ -912,16 +1087,16 @@ async function deleteCategory(id) {
             method: 'DELETE'
         });
         
-        // 删除相关账户
+        // \u5220\u9664\u76F8\u5173\u8D26\u6237
         accounts = accounts.filter(acc => acc.categoryId !== id);
         categories = categories.filter(cat => cat.id !== id);
         
         updateCategoriesList();
         updateCategorySelects();
         updateAccountsList();
-        alert('分类删除成功');
+        alert('\u5206\u7C7B\u5220\u9664\u6210\u529F');
     } catch (error) {
-        console.error('删除分类失败:', error);
+        console.error('\u5220\u9664\u5206\u7C7B\u5931\u8D25:', error);
     }
 }
 
@@ -934,7 +1109,7 @@ function updateCategoriesList() {
         item.className = 'category-item';
         item.innerHTML = \`
             <span class="category-name">\${category.name}</span>
-            <button class="delete-btn" onclick="deleteCategory('\${category.id}')">删除</button>
+            <button class="delete-btn" onclick="deleteCategory('\${category.id}')">\u5220\u9664</button>
         \`;
         container.appendChild(item);
     });
@@ -950,7 +1125,7 @@ function updateCategorySelects() {
         if (!select) return;
         
         const currentValue = select.value;
-        select.innerHTML = '<option value="">选择分类</option>';
+        select.innerHTML = '<option value="">\u9009\u62E9\u5206\u7C7B</option>';
         
         categories.forEach(category => {
             const option = document.createElement('option');
@@ -963,13 +1138,13 @@ function updateCategorySelects() {
     });
 }
 
-// 账户管理
+// \u8D26\u6237\u7BA1\u7406
 async function loadAccounts() {
     try {
         accounts = await apiCall('/api/accounts');
         updateAccountsList();
     } catch (error) {
-        console.error('加载账户失败:', error);
+        console.error('\u52A0\u8F7D\u8D26\u6237\u5931\u8D25:', error);
     }
 }
 
@@ -983,9 +1158,9 @@ async function addAccount() {
         notes: document.getElementById('accountNotes').value.trim()
     };
     
-    // 验证必填字段
+    // \u9A8C\u8BC1\u5FC5\u586B\u5B57\u6BB5
     if (!formData.categoryId || !formData.name || !formData.username || !formData.password) {
-        alert('请填写所有必填字段');
+        alert('\u8BF7\u586B\u5199\u6240\u6709\u5FC5\u586B\u5B57\u6BB5');
         return;
     }
     
@@ -998,9 +1173,9 @@ async function addAccount() {
         accounts.push(newAccount);
         updateAccountsList();
         clearAccountForm();
-        alert('账户添加成功');
+        alert('\u8D26\u6237\u6DFB\u52A0\u6210\u529F');
     } catch (error) {
-        console.error('添加账户失败:', error);
+        console.error('\u6DFB\u52A0\u8D26\u6237\u5931\u8D25:', error);
     }
 }
 
@@ -1028,8 +1203,8 @@ function updateAccountsList() {
                 \${category ? \`<span class="account-category">\${category.name}</span>\` : ''}
             </div>
             <div>
-                <button class="edit-btn" onclick="editAccount('\${account.id}')">编辑</button>
-                <button class="delete-btn" onclick="deleteAccount('\${account.id}')">删除</button>
+                <button class="edit-btn" onclick="editAccount('\${account.id}')">\u7F16\u8F91</button>
+                <button class="delete-btn" onclick="deleteAccount('\${account.id}')">\u5220\u9664</button>
             </div>
         \`;
         container.appendChild(item);
@@ -1037,7 +1212,7 @@ function updateAccountsList() {
 }
 
 async function deleteAccount(id) {
-    if (!confirm('确定要删除这个账户吗？')) {
+    if (!confirm('\u786E\u5B9A\u8981\u5220\u9664\u8FD9\u4E2A\u8D26\u6237\u5417\uFF1F')) {
         return;
     }
     
@@ -1048,9 +1223,9 @@ async function deleteAccount(id) {
         
         accounts = accounts.filter(acc => acc.id !== id);
         updateAccountsList();
-        alert('账户删除成功');
+        alert('\u8D26\u6237\u5220\u9664\u6210\u529F');
     } catch (error) {
-        console.error('删除账户失败:', error);
+        console.error('\u5220\u9664\u8D26\u6237\u5931\u8D25:', error);
     }
 }
 
@@ -1060,7 +1235,7 @@ function editAccount(id) {
     
     editingAccountId = id;
     
-    // 填充编辑表单
+    // \u586B\u5145\u7F16\u8F91\u8868\u5355
     document.getElementById('editCategory').value = account.categoryId || '';
     document.getElementById('editName').value = account.name;
     document.getElementById('editUsername').value = account.username;
@@ -1068,7 +1243,7 @@ function editAccount(id) {
     document.getElementById('editUrl').value = account.url || '';
     document.getElementById('editNotes').value = account.notes || '';
     
-    // 显示模态框
+    // \u663E\u793A\u6A21\u6001\u6846
     document.getElementById('editModal').style.display = 'block';
 }
 
@@ -1085,9 +1260,9 @@ async function saveEditedAccount() {
         notes: document.getElementById('editNotes').value.trim()
     };
     
-    // 验证必填字段
+    // \u9A8C\u8BC1\u5FC5\u586B\u5B57\u6BB5
     if (!formData.categoryId || !formData.name || !formData.username || !formData.password) {
-        alert('请填写所有必填字段');
+        alert('\u8BF7\u586B\u5199\u6240\u6709\u5FC5\u586B\u5B57\u6BB5');
         return;
     }
     
@@ -1105,9 +1280,183 @@ async function saveEditedAccount() {
         updateAccountsList();
         document.getElementById('editModal').style.display = 'none';
         editingAccountId = null;
-        alert('账户更新成功');
+        alert('\u8D26\u6237\u66F4\u65B0\u6210\u529F');
     } catch (error) {
-        console.error('更新账户失败:', error);
+        console.error('\u66F4\u65B0\u8D26\u6237\u5931\u8D25:', error);
     }
 }`;
-} 
+}
+__name(getJSContent, "getJSContent");
+
+// node_modules/wrangler/templates/middleware/middleware-ensure-req-body-drained.ts
+var drainBody = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx) => {
+  try {
+    return await middlewareCtx.next(request, env);
+  } finally {
+    try {
+      if (request.body !== null && !request.bodyUsed) {
+        const reader = request.body.getReader();
+        while (!(await reader.read()).done) {
+        }
+      }
+    } catch (e) {
+      console.error("Failed to drain the unused request body.", e);
+    }
+  }
+}, "drainBody");
+var middleware_ensure_req_body_drained_default = drainBody;
+
+// node_modules/wrangler/templates/middleware/middleware-miniflare3-json-error.ts
+function reduceError(e) {
+  return {
+    name: e?.name,
+    message: e?.message ?? String(e),
+    stack: e?.stack,
+    cause: e?.cause === void 0 ? void 0 : reduceError(e.cause)
+  };
+}
+__name(reduceError, "reduceError");
+var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx) => {
+  try {
+    return await middlewareCtx.next(request, env);
+  } catch (e) {
+    const error = reduceError(e);
+    return Response.json(error, {
+      status: 500,
+      headers: { "MF-Experimental-Error-Stack": "true" }
+    });
+  }
+}, "jsonError");
+var middleware_miniflare3_json_error_default = jsonError;
+
+// .wrangler/tmp/bundle-ELSNCk/middleware-insertion-facade.js
+var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
+  middleware_ensure_req_body_drained_default,
+  middleware_miniflare3_json_error_default
+];
+var middleware_insertion_facade_default = src_default;
+
+// node_modules/wrangler/templates/middleware/common.ts
+var __facade_middleware__ = [];
+function __facade_register__(...args) {
+  __facade_middleware__.push(...args.flat());
+}
+__name(__facade_register__, "__facade_register__");
+function __facade_invokeChain__(request, env, ctx, dispatch, middlewareChain) {
+  const [head, ...tail] = middlewareChain;
+  const middlewareCtx = {
+    dispatch,
+    next(newRequest, newEnv) {
+      return __facade_invokeChain__(newRequest, newEnv, ctx, dispatch, tail);
+    }
+  };
+  return head(request, env, ctx, middlewareCtx);
+}
+__name(__facade_invokeChain__, "__facade_invokeChain__");
+function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
+  return __facade_invokeChain__(request, env, ctx, dispatch, [
+    ...__facade_middleware__,
+    finalMiddleware
+  ]);
+}
+__name(__facade_invoke__, "__facade_invoke__");
+
+// .wrangler/tmp/bundle-ELSNCk/middleware-loader.entry.ts
+var __Facade_ScheduledController__ = class {
+  constructor(scheduledTime, cron, noRetry) {
+    this.scheduledTime = scheduledTime;
+    this.cron = cron;
+    this.#noRetry = noRetry;
+  }
+  #noRetry;
+  noRetry() {
+    if (!(this instanceof __Facade_ScheduledController__)) {
+      throw new TypeError("Illegal invocation");
+    }
+    this.#noRetry();
+  }
+};
+__name(__Facade_ScheduledController__, "__Facade_ScheduledController__");
+function wrapExportedHandler(worker) {
+  if (__INTERNAL_WRANGLER_MIDDLEWARE__ === void 0 || __INTERNAL_WRANGLER_MIDDLEWARE__.length === 0) {
+    return worker;
+  }
+  for (const middleware of __INTERNAL_WRANGLER_MIDDLEWARE__) {
+    __facade_register__(middleware);
+  }
+  const fetchDispatcher = /* @__PURE__ */ __name(function(request, env, ctx) {
+    if (worker.fetch === void 0) {
+      throw new Error("Handler does not export a fetch() function.");
+    }
+    return worker.fetch(request, env, ctx);
+  }, "fetchDispatcher");
+  return {
+    ...worker,
+    fetch(request, env, ctx) {
+      const dispatcher = /* @__PURE__ */ __name(function(type, init) {
+        if (type === "scheduled" && worker.scheduled !== void 0) {
+          const controller = new __Facade_ScheduledController__(
+            Date.now(),
+            init.cron ?? "",
+            () => {
+            }
+          );
+          return worker.scheduled(controller, env, ctx);
+        }
+      }, "dispatcher");
+      return __facade_invoke__(request, env, ctx, dispatcher, fetchDispatcher);
+    }
+  };
+}
+__name(wrapExportedHandler, "wrapExportedHandler");
+function wrapWorkerEntrypoint(klass) {
+  if (__INTERNAL_WRANGLER_MIDDLEWARE__ === void 0 || __INTERNAL_WRANGLER_MIDDLEWARE__.length === 0) {
+    return klass;
+  }
+  for (const middleware of __INTERNAL_WRANGLER_MIDDLEWARE__) {
+    __facade_register__(middleware);
+  }
+  return class extends klass {
+    #fetchDispatcher = (request, env, ctx) => {
+      this.env = env;
+      this.ctx = ctx;
+      if (super.fetch === void 0) {
+        throw new Error("Entrypoint class does not define a fetch() function.");
+      }
+      return super.fetch(request);
+    };
+    #dispatcher = (type, init) => {
+      if (type === "scheduled" && super.scheduled !== void 0) {
+        const controller = new __Facade_ScheduledController__(
+          Date.now(),
+          init.cron ?? "",
+          () => {
+          }
+        );
+        return super.scheduled(controller);
+      }
+    };
+    fetch(request) {
+      return __facade_invoke__(
+        request,
+        this.env,
+        this.ctx,
+        this.#dispatcher,
+        this.#fetchDispatcher
+      );
+    }
+  };
+}
+__name(wrapWorkerEntrypoint, "wrapWorkerEntrypoint");
+var WRAPPED_ENTRY;
+if (typeof middleware_insertion_facade_default === "object") {
+  WRAPPED_ENTRY = wrapExportedHandler(middleware_insertion_facade_default);
+} else if (typeof middleware_insertion_facade_default === "function") {
+  WRAPPED_ENTRY = wrapWorkerEntrypoint(middleware_insertion_facade_default);
+}
+var middleware_loader_entry_default = WRAPPED_ENTRY;
+export {
+  __INTERNAL_WRANGLER_MIDDLEWARE__,
+  middleware_loader_entry_default as default
+};
+//# sourceMappingURL=index.js.map
